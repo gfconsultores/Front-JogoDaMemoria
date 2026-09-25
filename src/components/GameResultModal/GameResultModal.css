@@ -1,0 +1,269 @@
+/**
+ * ==================================================
+ * MODAL DE RESULTADO FINAL
+ * ==================================================
+ */
+
+.game-result-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(6, 24, 43, 0.68);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-sizing: border-box;
+}
+
+
+/**
+ * Caixa principal do resultado.
+ */
+.game-result-modal {
+  width: 100%;
+  max-width: 370px;
+
+  padding: 24px 26px 22px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.32);
+
+  animation:
+    gameResultAppear 0.3s ease-out;
+}
+
+
+/**
+ * Icone superior.
+ */
+.game-result-icon {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 10px;
+
+  border-radius: 50%;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-size: 24px;
+  font-weight: 900;
+}
+
+
+/**
+ * Pequeno titulo superior.
+ */
+.game-result-eyebrow {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #147a4a;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+
+/**
+ * Nome do participante.
+ */
+.game-result-modal h2 {
+  margin: 0;
+
+  color: #0b3157;
+
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+
+/**
+ * Texto auxiliar.
+ */
+.game-result-message {
+  margin: 10px 0 6px;
+
+  color: #667085;
+
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+
+/**
+ * Destaque do nivel alcancado.
+ */
+.game-result-level {
+  margin: 7px auto 17px;
+
+  color: #0b3157;
+
+  font-size: 32px;
+  font-weight: 900;
+
+  line-height: 1;
+
+  letter-spacing: 0.5px;
+}
+
+
+/**
+ * Botao que encerra a participacao
+ * e libera o sistema para o proximo jogador.
+ */
+.game-result-button {
+  width: 100%;
+  max-width: 220px;
+
+  min-height: 40px;
+
+  padding: 9px 20px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 16px rgba(11, 49, 87, 0.24);
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.game-result-button:hover {
+  background: #0f4c81;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 9px 20px rgba(11, 49, 87, 0.3);
+}
+
+.game-result-button:active {
+  transform: translateY(0);
+}
+
+
+/**
+ * Animacao de entrada.
+ */
+@keyframes gameResultAppear {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(12px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/**
+ * ==================================================
+ * CELULARES
+ * ==================================================
+ */
+
+@media (max-width: 600px) {
+  .game-result-overlay {
+    padding: 12px;
+  }
+
+  .game-result-modal {
+    max-width: 340px;
+
+    padding:
+      22px
+      18px
+      20px;
+
+    border-radius: 16px;
+  }
+
+  .game-result-icon {
+    width: 42px;
+    height: 42px;
+
+    font-size: 22px;
+  }
+
+  .game-result-modal h2 {
+    font-size: 20px;
+  }
+
+  .game-result-message {
+    font-size: 13px;
+  }
+
+  .game-result-level {
+    font-size: 29px;
+
+    margin-bottom: 15px;
+  }
+
+  .game-result-button {
+    max-width: 210px;
+
+    min-height: 39px;
+
+    font-size: 13px;
+  }
+}
+
+
+/**
+ * ==================================================
+ * ACESSIBILIDADE
+ * ==================================================
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .game-result-modal {
+    animation: none;
+  }
+}

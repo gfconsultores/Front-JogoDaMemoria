@@ -1,0 +1,109 @@
+.game-countdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.62);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  overflow: hidden;
+}
+
+
+/**
+ * Numero da contagem.
+ *
+ * Sem circulo, borda ou caixa.
+ * O numero aparece livre no centro da tela.
+ */
+.game-countdown-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 180px;
+
+  color: #0b3157;
+
+  font-size: clamp(72px, 9vw, 110px);
+  font-weight: 900;
+  line-height: 1;
+
+  text-align: center;
+  letter-spacing: -3px;
+
+  text-shadow:
+    0 8px 25px rgba(11, 49, 87, 0.18);
+
+  animation:
+    countdownAppear 0.85s ease-out;
+}
+
+
+/**
+ * O numero surge maior e vai diminuindo
+ * suavemente enquanto desaparece.
+ */
+@keyframes countdownAppear {
+  0% {
+    opacity: 0;
+    transform: scale(1.45);
+    filter: blur(5px);
+  }
+
+  25% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.82);
+    filter: blur(2px);
+  }
+}
+
+
+/**
+ * Tablets.
+ */
+@media (max-width: 900px) {
+  .game-countdown-number {
+    font-size: clamp(68px, 11vw, 95px);
+  }
+}
+
+
+/**
+ * Celulares.
+ */
+@media (max-width: 600px) {
+  .game-countdown-number {
+    min-width: 130px;
+
+    font-size: clamp(60px, 20vw, 82px);
+  }
+}
+
+
+/**
+ * Acessibilidade.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .game-countdown-number {
+    animation: none;
+  }
+}

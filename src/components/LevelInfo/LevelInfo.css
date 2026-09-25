@@ -1,0 +1,58 @@
+/**
+ * Define a aparencia das informacoes exibidas durante cada nivel.
+ * Organiza o numero do nivel e a mensagem referente
+ * ao estado atual do jogo.
+ */
+
+.level-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  margin-bottom: 10px;
+
+  text-align: center;
+}
+
+
+/**
+ * Numero do nivel.
+ */
+.level-number {
+  font-size: clamp(36px, 4.5vmin, 48px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0b3157;
+}
+
+.level-status {
+  font-size: clamp(21px, 2.7vmin, 28px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: #344054;
+}
+
+/**
+ * Telas menores.
+ *
+ * Mantemos tamanhos confortaveis em vez de
+ * reduzir excessivamente o cabecalho.
+ */
+@media (max-width: 600px) {
+  .level-info {
+    gap: 4px;
+
+    margin-bottom: 8px;
+  }
+
+  .level-number {
+    font-size: clamp(28px, 7vw, 36px);
+  }
+
+  .level-status {
+    font-size: clamp(17px, 4.5vw, 22px);
+  }
+}

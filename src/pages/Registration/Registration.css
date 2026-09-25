@@ -1,0 +1,199 @@
+/* ==========================================================================
+   TELA DE REGISTRO / CADASTRO
+   ========================================================================== */
+
+/* Importação da Fonte Modern Sans-Serif (Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Página Principal */
+.registration-page {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+  box-sizing: border-box;
+
+  /* Gradiente moderno e suave */
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(15, 76, 129, 0.08), transparent 40%),
+    linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+}
+
+/* Card Principal do Formulário */
+.registration-card {
+  width: 100%;
+  max-width: 440px;
+
+  padding: 40px 36px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 18px;
+
+  /* Sombra leve em camadas */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.02),
+    0 20px 25px -5px rgba(15, 23, 42, 0.05);
+}
+
+/* Cabeçalho do Card */
+.registration-header {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.registration-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+
+  color: #0f4c81;
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.registration-header h1 {
+  margin: 0 0 8px;
+
+  color: #0f172a;
+
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.registration-header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Formulário e Campos de Entrada */
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 14px;
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  outline: none;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 15px;
+
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input::placeholder {
+  color: #94a3b8;
+}
+
+.form-field input:focus {
+  border-color: #0f4c81;
+
+  box-shadow: 0 0 0 4px rgba(15, 76, 129, 0.1);
+}
+
+/* Botão de Submissão */
+.registration-button {
+  width: 100%;
+  height: 48px;
+
+  margin-top: 6px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.registration-button:hover {
+  background: #0f4c81;
+
+  box-shadow: 0 4px 12px rgba(11, 49, 87, 0.15);
+  transform: translateY(-1px);
+}
+
+.registration-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Rodapé do Card */
+.registration-note {
+  margin: 20px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Responsividade Celular */
+@media (max-width: 500px) {
+  .registration-page {
+    padding: 16px;
+  }
+
+  .registration-card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .registration-header h1 {
+    font-size: 22px;
+  }
+}

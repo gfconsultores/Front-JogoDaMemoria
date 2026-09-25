@@ -1,0 +1,584 @@
+/**
+ * ==================================================
+ * TELA PRINCIPAL DO JOGO
+ * ==================================================
+ */
+
+.game {
+  --page-padding: clamp(10px, 2vw, 24px);
+
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  padding:
+    clamp(45px, 7vh, 70px)
+    var(--page-padding)
+    24px;
+
+  box-sizing: border-box;
+}
+
+
+/**
+ * ==================================================
+ * TABULEIRO
+ * ==================================================
+ */
+
+.game-board {
+  --gap: clamp(6px, 1.5vmin, 14px);
+
+  --card-size: min(
+    17vw,
+    17vh,
+    160px
+  );
+
+  --card-w: var(--card-size);
+  --card-h: var(--card-size);
+
+  width: fit-content;
+  max-width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      var(--board-columns, 3),
+      var(--card-w)
+    );
+
+  grid-auto-rows: var(--card-h);
+
+  justify-content: center;
+  align-content: center;
+
+  gap: var(--gap);
+
+  margin-top: clamp(12px, 2vh, 20px);
+}
+
+
+/**
+ * ==================================================
+ * CRONOMETROS
+ * ==================================================
+ */
+
+.memorize-timer,
+.play-timer {
+  position: fixed;
+
+  top: 16px;
+  right: 16px;
+
+  z-index: 50;
+
+  padding: 10px 16px;
+
+  box-sizing: border-box;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  border-radius: 10px;
+
+  font-size: clamp(13px, 1.5vw, 16px);
+  font-weight: bold;
+
+  white-space: nowrap;
+
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+
+/**
+ * ==================================================
+ * MENSAGEM TEMPORARIA
+ * ==================================================
+ */
+
+.game-message {
+  position: fixed;
+
+  top: 24px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: max-content;
+
+  max-width:
+    min(
+      420px,
+      calc(100vw - 30px)
+    );
+
+  padding: 13px 22px;
+
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.98);
+  color: #344054;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  text-align: center;
+
+  box-shadow:
+    0 8px 24px rgba(16, 24, 40, 0.1),
+    0 2px 6px rgba(16, 24, 40, 0.06);
+
+  pointer-events: none;
+
+  animation: messageAppear 0.25s ease-out;
+}
+
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+
+    transform:
+      translate(-50%, -10px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate(-50%, 0)
+      scale(1);
+  }
+}
+
+
+/**
+ * ==================================================
+ * TABLETS GRANDES / TELAS MAIS QUADRADAS
+ * Exemplo: iPad Pro 13"
+ * ==================================================
+ */
+
+@media (min-width: 901px) and (max-aspect-ratio: 5/4) {
+
+  .game {
+    padding-top:
+      clamp(40px, 6vh, 60px);
+  }
+
+
+  .game-board {
+    --gap:
+      clamp(10px, 1.5vmin, 18px);
+
+    --reserved: 260px;
+
+    --max-card: 205px;
+
+    --avail-h: calc(
+      (
+        100dvh -
+        var(--reserved) -
+        (var(--board-rows, 4) - 1) *
+        var(--gap)
+      ) /
+      var(--board-rows, 4)
+    );
+
+
+    --card-w: min(
+      calc(
+        (
+          100vw -
+          2 * var(--page-padding) -
+          (var(--board-columns, 3) - 1) *
+          var(--gap)
+        ) /
+        var(--board-columns, 3)
+      ),
+      var(--avail-h),
+      var(--max-card)
+    );
+
+
+    --card-h: min(
+      var(--avail-h),
+      calc(var(--card-w) * 1.4)
+    );
+  }
+
+
+  /**
+   * 6 cartas
+   */
+  .game-board-6 {
+    --board-rows: 2;
+  }
+
+
+  /**
+   * 8 cartas
+   */
+  .game-board-8 {
+    --board-rows: 2;
+  }
+
+
+  /**
+   * ==================================================
+   * LEVEL 3 - 10 CARTAS
+   * ==================================================
+   *
+   * Mantem 5 x 2.
+   *
+   * Em tablets grandes, o tabuleiro utiliza
+   * aproximadamente 82% da largura da tela.
+   *
+   * As cartas crescem proporcionalmente,
+   * mas possuem limite de 175px.
+   */
+
+  .game-board-10 {
+    --board-columns: 5 !important;
+    --board-rows: 2;
+
+    --card-w: min(
+      calc(
+        (
+          82vw -
+          (4 * var(--gap))
+        ) / 5
+      ),
+      175px
+    );
+
+    --card-h: var(--card-w);
+  }
+
+
+  /**
+   * 12 cartas
+   */
+  .game-board-12 {
+    --board-rows: 3;
+  }
+
+
+  /**
+   * 16 cartas
+   */
+  .game-board-16 {
+    --board-rows: 4;
+  }
+
+
+  /**
+   * 20 cartas
+   */
+  .game-board-20 {
+    --board-rows: 4;
+  }
+
+
+  .game-board > * {
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    font-size:
+      calc(var(--card-w) * 0.35);
+  }
+}
+
+
+/**
+ * ==================================================
+ * TABLETS E TELAS ATE 900PX
+ * ==================================================
+ */
+
+@media (max-width: 900px) {
+
+  .game {
+    --page-padding:
+      clamp(8px, 2vw, 16px);
+
+    padding:
+      clamp(45px, 7vh, 65px)
+      var(--page-padding)
+      20px;
+  }
+
+
+  .game-board {
+    --gap:
+      clamp(5px, 1.2vmin, 10px);
+
+    --reserved: 180px;
+
+    --max-card: 160px;
+
+    --avail-h: calc(
+      (
+        100dvh -
+        var(--reserved) -
+        (var(--board-rows, 4) - 1) *
+        var(--gap)
+      ) /
+      var(--board-rows, 4)
+    );
+
+
+    --card-w: min(
+      calc(
+        (
+          100vw -
+          2 * var(--page-padding) -
+          (var(--board-columns, 3) - 1) *
+          var(--gap)
+        ) /
+        var(--board-columns, 3)
+      ),
+      calc(var(--avail-h) * 1.1),
+      var(--max-card)
+    );
+
+
+    --card-h: min(
+      var(--avail-h),
+      calc(var(--card-w) * 1.4)
+    );
+
+
+    margin-top:
+      clamp(10px, 1.5vh, 16px);
+  }
+
+
+  .game-board-6 {
+    --board-rows: 2;
+  }
+
+
+  .game-board-8 {
+    --board-rows: 2;
+  }
+
+
+  /**
+   * ==================================================
+   * LEVEL 3 - 10 CARTAS
+   * ==================================================
+   *
+   * Mantem 5 x 2.
+   *
+   * Em tablets menores utiliza aproximadamente
+   * 88% da largura disponivel.
+   */
+
+  .game-board-10 {
+    --board-columns: 5 !important;
+    --board-rows: 2;
+
+    --card-w: min(
+      calc(
+        (
+          88vw -
+          (4 * var(--gap))
+        ) / 5
+      ),
+      145px
+    );
+
+    --card-h: var(--card-w);
+  }
+
+
+  .game-board-12 {
+    --board-rows: 3;
+  }
+
+
+  .game-board-16 {
+    --board-rows: 4;
+  }
+
+
+  .game-board-20 {
+    --board-columns: 4 !important;
+    --board-rows: 5;
+  }
+
+
+  .game-board > * {
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    font-size:
+      calc(var(--card-w) * 0.35);
+  }
+
+
+  .memorize-timer,
+  .play-timer {
+    top: 10px;
+    right: 10px;
+
+    padding: 7px 11px;
+
+    font-size: 13px;
+  }
+}
+
+
+/**
+ * ==================================================
+ * CELULARES
+ * ==================================================
+ */
+
+@media (max-width: 600px) {
+
+  .game {
+    --page-padding: 8px;
+
+    padding:
+      55px
+      var(--page-padding)
+      14px;
+  }
+
+
+  .game-board {
+    --gap:
+      clamp(4px, 1.2vmin, 7px);
+
+    --max-card: 120px;
+
+    --reserved: 175px;
+
+    margin-top: 10px;
+  }
+
+
+  /**
+   * 10 cartas em celulares.
+   *
+   * Continua 5 x 2 e reduz
+   * automaticamente conforme a largura.
+   */
+
+  .game-board-10 {
+    --board-columns: 5 !important;
+    --board-rows: 2;
+
+    --card-w: min(
+      calc(
+        (
+          94vw -
+          (4 * var(--gap))
+        ) / 5
+      ),
+      100px
+    );
+
+    --card-h: var(--card-w);
+  }
+
+
+  .memorize-timer,
+  .play-timer {
+    position: fixed;
+
+    top: 8px;
+    right: 8px;
+
+    margin: 0;
+
+    padding: 6px 10px;
+
+    font-size: 12px;
+  }
+
+
+  .game-message {
+    top: 10px;
+
+    max-width:
+      calc(100vw - 20px);
+
+    padding: 10px 14px;
+
+    font-size: 13px;
+  }
+}
+
+
+/**
+ * ==================================================
+ * CELULARES MUITO PEQUENOS
+ * ==================================================
+ */
+
+@media (max-width: 400px) {
+
+  .game {
+    --page-padding: 6px;
+
+    padding:
+      50px
+      var(--page-padding)
+      12px;
+  }
+
+
+  .game-board {
+    --gap: 4px;
+
+    --max-card: 100px;
+
+    margin-top: 8px;
+  }
+
+
+  .game-board-10 {
+    --board-columns: 5 !important;
+    --board-rows: 2;
+
+    --card-w: calc(
+      (
+        96vw -
+        (4 * var(--gap))
+      ) / 5
+    );
+
+    --card-h: var(--card-w);
+  }
+}

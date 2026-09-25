@@ -1,0 +1,201 @@
+.company-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.company-autocomplete input {
+  width: 100%;
+  height: 50px;
+
+  padding: 0 15px;
+  box-sizing: border-box;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  outline: none;
+
+  background: #ffffff;
+  color: #101828;
+
+  font-family: inherit;
+  font-size: 16px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.company-autocomplete input::placeholder {
+  color: #98a2b3;
+}
+
+.company-autocomplete input:focus {
+  border-color: #0f4c81;
+
+  box-shadow:
+    0 0 0 3px rgba(15, 76, 129, 0.12);
+}
+
+/* Caixa com as empresas encontradas */
+
+.company-suggestions {
+  position: absolute;
+
+  top: calc(100% + 6px);
+  left: 0;
+
+  width: 100%;
+  max-height: 220px;
+
+  overflow-y: auto;
+
+  padding: 6px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+
+  box-shadow:
+    0 10px 30px rgba(16, 24, 40, 0.12),
+    0 3px 8px rgba(16, 24, 40, 0.06);
+
+  z-index: 100;
+}
+
+/* Cada empresa encontrada */
+
+.company-suggestion {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding: 11px 12px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #344054;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.company-suggestion:hover {
+  background: #f2f6fa;
+  color: #0b3157;
+}
+
+/* Nenhuma empresa encontrada */
+
+.company-empty {
+  padding: 12px;
+
+  color: #667085;
+
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Scroll da lista */
+
+.company-suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.company-suggestions::-webkit-scrollbar-thumb {
+  background: #d0d5dd;
+  border-radius: 10px;
+}
+
+.company-suggestions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.company-divider {
+  height: 1px;
+
+  margin: 6px 4px;
+
+  background: #e4e7ec;
+}
+
+.company-create {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 11px 12px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #0f4c81;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.company-create:hover {
+  background: #f2f6fa;
+}
+
+.company-create-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Celular */
+
+@media (max-width: 500px) {
+  .company-autocomplete input {
+    height: 48px;
+  }
+
+  .company-suggestions {
+    max-height: 190px;
+  }
+
+  .company-suggestion {
+    padding: 12px 10px;
+  }
+}

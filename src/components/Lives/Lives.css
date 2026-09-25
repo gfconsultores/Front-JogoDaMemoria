@@ -1,0 +1,82 @@
+/**
+ * Define a aparencia do indicador de tentativas do jogador.
+ * Exibe visualmente as tentativas disponiveis
+ * e as que ja foram perdidas.
+ */
+
+.lives {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+/**
+ * Texto "Vidas".
+ */
+.lives-label {
+  font-size: clamp(36px, 2.5vmin, 26px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: #344054;
+}
+
+/**
+ * Container dos coracoes.
+ */
+.lives-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/**
+ * Coracao individual.
+ */
+.life {
+  font-size: clamp(32px, 3.8vmin, 60px);
+  line-height: 1;
+  transition:
+  transform 0.2s ease,
+  opacity 0.2s ease;
+}
+
+
+/**
+ * Vida disponivel.
+ */
+.life.active {
+  opacity: 1;
+}
+
+
+/**
+ * Vida perdida.
+ */
+.life.lost {
+  opacity: 0.35;
+
+  transform: scale(0.9);
+}
+
+
+/**
+ * Telas menores.
+ */
+@media (max-width: 600px) {
+  .lives {
+    gap: 3px;
+
+    margin-bottom: 7px;
+  }
+
+  .lives-label {
+    font-size: clamp(16px, 4vw, 20px);
+  }
+
+  .life {
+    font-size: clamp(26px, 7vw, 34px);
+  }
+}

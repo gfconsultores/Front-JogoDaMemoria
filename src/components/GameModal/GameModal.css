@@ -1,0 +1,126 @@
+/**
+ * Estilos do modal de fim de jogo e conclusao de nivel.
+ */
+
+.game-modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  z-index: 1000;
+}
+
+.game-modal {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 35px 30px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+
+  animation: gameModalAppear 0.25s ease-out;
+}
+
+.game-modal-icon {
+  width: 65px;
+  height: 65px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-size: 38px;
+  font-weight: bold;
+}
+
+.game-modal h2 {
+  margin: 0 0 12px;
+
+  color: #0b3157;
+
+  font-size: 28px;
+}
+
+.game-modal p {
+  margin: 0 0 25px;
+
+  color: #4b5563;
+
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.game-modal-button {
+  min-width: 190px;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #0b3157;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.game-modal-button:hover {
+  transform: scale(1.04);
+
+  background: #0f4c81;
+}
+
+.game-modal-button:active {
+  transform: scale(0.98);
+}
+
+@keyframes gameModalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 500px) {
+  .game-modal {
+    padding: 30px 20px;
+  }
+
+  .game-modal h2 {
+    font-size: 24px;
+  }
+}
