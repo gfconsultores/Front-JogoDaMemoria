@@ -10,8 +10,6 @@ import {
 import { Participants } from "./pages/Participants/Participants";
 import { Admin } from "./pages/Admin/Admin";
 
-import { GF_ADMIN } from "./config/adminConfig";
-
 import {
   exportParticipantsToExcel,
 } from "./export/participantsExport";
@@ -43,6 +41,9 @@ const PARTICIPANT_KEY =
 
 const ADMIN_KEY =
   "gf-memory-admin-session";
+
+const ADMIN_GAME_KEY =
+  "gf-memory-admin-game";
 
 /**
  * ==================================================
@@ -104,6 +105,25 @@ function getInitialAdminSession(): boolean {
   );
 }
 
+/**
+ * ==================================================
+ * RECUPERAR TIPO DA PARTIDA
+ * ==================================================
+ *
+ * true:
+ * partida iniciada pela Área Administrativa.
+ *
+ * false:
+ * partida de um participante normal.
+ */
+function getInitialAdminGame(): boolean {
+  return (
+    sessionStorage.getItem(
+      ADMIN_GAME_KEY
+    ) === "true"
+  );
+}
+
 function App() {
   /**
    * ==================================================
@@ -118,6 +138,12 @@ function App() {
 
   /**
    * Participante atualmente jogando.
+   *
+   * Na partida administrativa usamos um participante
+   * interno apenas para atender à estrutura atual do
+   * componente Game.
+   *
+   * Ele NÃO é salvo na lista de participantes.
    */
   const [
     participant,
@@ -128,12 +154,34 @@ function App() {
     );
 
   /**
-   * Indica se existe uma sessão
-   * administrativa ativa.
+   * ==================================================
+   * SESSÃO ADMINISTRATIVA
+   * ==================================================
+   *
+   * Indica exclusivamente se houve autenticação
+   * administrativa.
+   *
+   * Não indica quem está jogando.
    */
   const [isAdmin, setIsAdmin] =
     useState<boolean>(
       getInitialAdminSession
+    );
+
+  /**
+   * ==================================================
+   * PARTIDA ADMINISTRATIVA
+   * ==================================================
+   *
+   * Indica exclusivamente se o jogo atual foi
+   * iniciado pela Equipe GF.
+   */
+  const [
+    isAdminGame,
+    setIsAdminGame,
+  ] =
+    useState<boolean>(
+      getInitialAdminGame
     );
 
   /**
@@ -193,19 +241,62 @@ function App() {
 
   /**
    * ==================================================
-   * CORREÇÃO DE ESTADO INVÁLIDO
+   * PERSISTÊNCIA DA PARTIDA ADMIN
    * ==================================================
-   *
-   * Se a tela salva for "game",
-   * mas não existir participante,
-   * retorna para uma tela válida.
    */
 
+  useEffect(() => {
+    if (isAdminGame) {
+      sessionStorage.setItem(
+        ADMIN_GAME_KEY,
+        "true"
+      );
+
+      return;
+    }
+
+    sessionStorage.removeItem(
+      ADMIN_GAME_KEY
+    );
+  }, [isAdminGame]);
+
+  /**
+   * ==================================================
+   * PROTEGER TELAS ADMINISTRATIVAS
+   * ==================================================
+   *
+   * Se por algum motivo a sessão administrativa
+   * não estiver ativa, não permitimos permanecer
+   * nas telas administrativas.
+   */
+  useEffect(() => {
+    if (
+      !isAdmin &&
+      (
+        screen === "admin" ||
+        screen === "participants"
+      )
+    ) {
+      setScreen("registration");
+    }
+  }, [screen, isAdmin]);
+
+  /**
+   * ==================================================
+   * CORREÇÃO DE ESTADO INVÁLIDO DO JOGO
+   * ==================================================
+   *
+   * Se a tela salva for "game", mas não existir
+   * participante/jogador interno, retorna para uma
+   * tela válida.
+   */
   useEffect(() => {
     if (
       screen === "game" &&
       !participant
     ) {
+      setIsAdminGame(false);
+
       if (isAdmin) {
         setScreen("admin");
       } else {
@@ -229,7 +320,15 @@ function App() {
   function handleRegistrationSuccess(
     participantData: ParticipantData
   ) {
-    setIsAdmin(false);
+    /**
+     * Uma partida iniciada pelo cadastro é sempre
+     * uma partida normal.
+     *
+     * Não encerramos a sessão administrativa aqui.
+     * Sessão administrativa e tipo de partida são
+     * estados independentes.
+     */
+    setIsAdminGame(false);
 
     setParticipant(
       participantData
@@ -247,6 +346,8 @@ function App() {
   function handleAdminSuccess() {
     setIsAdmin(true);
 
+    setIsAdminGame(false);
+
     setParticipant(null);
 
     setScreen("admin");
@@ -254,19 +355,25 @@ function App() {
 
   /**
    * ==================================================
-   * JOGAR COMO ADMINISTRADOR
+   * JOGAR COMO EQUIPE GF
    * ==================================================
+   *
+   * Estes dados são apenas internos para permitir
+   * que o componente Game continue recebendo um
+   * ParticipantData.
+   *
+   * Eles NÃO são credenciais administrativas
+   * e NÃO são gravados no cadastro.
    */
-
   function handlePlayAsGF() {
     const adminParticipant: ParticipantData =
       {
         name: "Equipe GF",
-        company:
-          GF_ADMIN.company,
-        phone:
-          GF_ADMIN.phone,
+        company: "GF Consultores",
+        phone: "ADMIN",
       };
+
+    setIsAdminGame(true);
 
     setParticipant(
       adminParticipant
@@ -282,22 +389,30 @@ function App() {
    */
 
   function handleGameFinish() {
+    const finishedAdminGame =
+      isAdminGame;
+
     setParticipant(null);
 
+    setIsAdminGame(false);
+
     /**
-     * Se a sessão administrativa
-     * continua ativa, volta para
-     * a Área Administrativa.
+     * Se a partida foi iniciada pela Área
+     * Administrativa e a sessão continua ativa,
+     * retorna para o painel administrativo.
      */
-    if (isAdmin) {
+    if (
+      finishedAdminGame &&
+      isAdmin
+    ) {
       setScreen("admin");
 
       return;
     }
 
     /**
-     * Participante normal retorna
-     * para o cadastro.
+     * Participante normal retorna para
+     * a tela de cadastro.
      */
     setScreen("registration");
   }
@@ -309,6 +424,14 @@ function App() {
    */
 
   function handleParticipants() {
+    if (!isAdmin) {
+      setScreen(
+        "registration"
+      );
+
+      return;
+    }
+
     setScreen(
       "participants"
     );
@@ -321,6 +444,10 @@ function App() {
    */
 
   function handleExport() {
+    if (!isAdmin) {
+      return;
+    }
+
     const exported =
       exportParticipantsToExcel();
 
@@ -339,10 +466,14 @@ function App() {
    * ==================================================
    * SAIR DA ÁREA ADMINISTRATIVA
    * ==================================================
+   *
+   * Este é o único fluxo que encerra explicitamente
+   * a sessão administrativa.
    */
-
   function handleAdminLogout() {
     setIsAdmin(false);
+
+    setIsAdminGame(false);
 
     setParticipant(null);
 
@@ -360,7 +491,17 @@ function App() {
   function handleAdminGameBack() {
     setParticipant(null);
 
-    setScreen("admin");
+    setIsAdminGame(false);
+
+    if (isAdmin) {
+      setScreen("admin");
+
+      return;
+    }
+
+    setScreen(
+      "registration"
+    );
   }
 
   /**
@@ -371,7 +512,8 @@ function App() {
 
   if (
     screen ===
-    "participants"
+    "participants" &&
+    isAdmin
   ) {
     return (
       <Participants
@@ -389,7 +531,8 @@ function App() {
    */
 
   if (
-    screen === "admin"
+    screen === "admin" &&
+    isAdmin
   ) {
     return (
       <Admin
@@ -428,9 +571,10 @@ function App() {
           handleGameFinish
         }
         isAdmin={
-          isAdmin
+          isAdminGame
         }
         onBack={
+          isAdminGame &&
           isAdmin
             ? handleAdminGameBack
             : undefined

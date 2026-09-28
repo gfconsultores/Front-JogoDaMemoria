@@ -3,11 +3,16 @@
  * CONFIGURAÇÃO ADMINISTRATIVA - GF
  * ==================================================
  *
- * Dados utilizados para liberar o acesso
+ * Credenciais utilizadas para liberar o acesso
  * administrativo ao sistema.
+ *
+ * IMPORTANTE:
+ * Como o sistema atualmente funciona localmente e
+ * sem backend, estas credenciais ficam armazenadas
+ * no próprio aplicativo.
  */
 
 export const GF_ADMIN = {
-  company: "GF Consultores",
-  phone: "00000000000",
+  login: "gfconsultores",
+  password: "gf@2026",
 };

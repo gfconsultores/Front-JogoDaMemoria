@@ -29,7 +29,7 @@ import "./Game.css";
  *
  * Antes da versao final, voltar para o nivel 1.
  */
-const TEST_LEVEL = 4;
+const TEST_LEVEL = 1;
 
 interface GameProps {
   participant: ParticipantData;

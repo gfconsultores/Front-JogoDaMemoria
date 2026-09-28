@@ -1,5 +1,9 @@
 import { useState } from "react";
 
+import {
+  getParticipants,
+} from "../../storage/participantsStorage";
+
 import "./CompanyAutocomplete.css";
 
 interface Company {
@@ -13,98 +17,179 @@ interface CompanyAutocompleteProps {
 }
 
 /**
- * Empresas temporarias utilizadas apenas
- * durante o desenvolvimento do front-end.
+ * ==================================================
+ * NORMALIZAR NOME DA EMPRESA
+ * ==================================================
  *
- * Futuramente esta lista sera substituida
- * pela consulta ao backend.
+ * Utilizado para evitar empresas duplicadas
+ * apenas por diferenças de maiúsculas,
+ * minúsculas ou espaços.
  */
-const testCompanies: Company[] = [
-  {
-    id: "company-001",
-    name: "G3 Telecom",
-  },
-  {
-    id: "company-002",
-    name: "Grande Rede",
-  },
-  {
-    id: "company-003",
-    name: "Oxente Net Telecom",
-  },
-  {
-    id: "company-004",
-    name: "ST1 Internet",
-  },
-  {
-    id: "company-005",
-    name: "Connect Fibra",
-  },
-];
+function normalizeCompany(
+  company: string
+): string {
+  return company
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("pt-BR");
+}
+
+/**
+ * ==================================================
+ * OBTER EMPRESAS CADASTRADAS
+ * ==================================================
+ *
+ * As empresas são obtidas automaticamente
+ * através dos participantes já cadastrados.
+ */
+function getRegisteredCompanies(): Company[] {
+  const participants =
+    getParticipants();
+
+  const companies =
+    new Map<string, Company>();
+
+  participants.forEach(
+    (participant) => {
+      const companyName =
+        participant.company.trim();
+
+      const normalizedName =
+        normalizeCompany(
+          companyName
+        );
+
+      if (
+        !normalizedName ||
+        companies.has(
+          normalizedName
+        )
+      ) {
+        return;
+      }
+
+      companies.set(
+        normalizedName,
+        {
+          id: normalizedName,
+          name: companyName,
+        }
+      );
+    }
+  );
+
+  return Array.from(
+    companies.values()
+  ).sort((a, b) =>
+    a.name.localeCompare(
+      b.name,
+      "pt-BR"
+    )
+  );
+}
 
 export function CompanyAutocomplete({
   value,
   onChange,
 }: CompanyAutocompleteProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const normalizedSearch = value
-    .trim()
-    .toLocaleLowerCase("pt-BR");
+  const [isOpen, setIsOpen] =
+    useState(false);
 
   /**
-   * Procura empresas que contenham
-   * o texto digitado.
+   * Agora não existe mais nenhuma
+   * empresa fixa de teste.
+   *
+   * A lista é criada usando os
+   * participantes já cadastrados.
+   */
+  const companies =
+    getRegisteredCompanies();
+
+  const normalizedSearch =
+    normalizeCompany(value);
+
+  /**
+   * ==================================================
+   * FILTRAR EMPRESAS
+   * ==================================================
    */
   const filteredCompanies =
     normalizedSearch.length > 0
-      ? testCompanies.filter((company) =>
-          company.name
-            .toLocaleLowerCase("pt-BR")
-            .includes(normalizedSearch)
+      ? companies.filter(
+          (company) =>
+            normalizeCompany(
+              company.name
+            ).includes(
+              normalizedSearch
+            )
         )
       : [];
 
   /**
-   * Verifica se existe uma empresa
-   * com exatamente o mesmo nome digitado.
+   * ==================================================
+   * EMPRESA EXATA JÁ EXISTE
+   * ==================================================
    */
-  const exactCompanyExists = testCompanies.some(
-    (company) =>
-      company.name
-        .trim()
-        .toLocaleLowerCase("pt-BR") ===
-      normalizedSearch
-  );
+  const exactCompanyExists =
+    companies.some(
+      (company) =>
+        normalizeCompany(
+          company.name
+        ) === normalizedSearch
+    );
 
+  /**
+   * ==================================================
+   * ALTERAR TEXTO
+   * ==================================================
+   */
   function handleInputChange(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
-    onChange(event.target.value);
+    onChange(
+      event.target.value
+    );
+
     setIsOpen(true);
   }
 
-  function handleSelectCompany(company: Company) {
-    onChange(company.name);
+  /**
+   * ==================================================
+   * SELECIONAR EMPRESA EXISTENTE
+   * ==================================================
+   */
+  function handleSelectCompany(
+    company: Company
+  ) {
+    onChange(
+      company.name
+    );
+
     setIsOpen(false);
   }
 
   /**
-   * Simula o cadastro de uma nova empresa.
+   * ==================================================
+   * UTILIZAR NOVA EMPRESA
+   * ==================================================
    *
-   * Por enquanto apenas selecionamos o nome
-   * digitado e fechamos a lista.
-   *
-   * Futuramente esta funcao chamara o backend.
+   * A empresa será efetivamente armazenada
+   * quando o participante for cadastrado.
    */
   function handleNewCompany() {
-    const newCompanyName = value.trim();
+    const newCompanyName =
+      value
+        .trim()
+        .replace(/\s+/g, " ");
 
     if (!newCompanyName) {
       return;
     }
 
-    onChange(newCompanyName);
+    onChange(
+      newCompanyName
+    );
+
     setIsOpen(false);
   }
 
@@ -114,7 +199,9 @@ export function CompanyAutocomplete({
         id="player-company"
         type="text"
         value={value}
-        onChange={handleInputChange}
+        onChange={
+          handleInputChange
+        }
         onFocus={() => {
           if (value.trim()) {
             setIsOpen(true);
@@ -125,47 +212,59 @@ export function CompanyAutocomplete({
         required
       />
 
-      {isOpen && normalizedSearch && (
-        <div className="company-suggestions">
-          {filteredCompanies.map((company) => (
-            <button
-              key={company.id}
-              type="button"
-              className="company-suggestion"
-              onClick={() =>
-                handleSelectCompany(company)
-              }
-            >
-              {company.name}
-            </button>
-          ))}
+      {isOpen &&
+        normalizedSearch && (
+          <div className="company-suggestions">
+            {filteredCompanies.map(
+              (company) => (
+                <button
+                  key={
+                    company.id
+                  }
+                  type="button"
+                  className="company-suggestion"
+                  onClick={() =>
+                    handleSelectCompany(
+                      company
+                    )
+                  }
+                >
+                  {company.name}
+                </button>
+              )
+            )}
 
-          {!exactCompanyExists && (
-            <>
-              {filteredCompanies.length > 0 && (
-                <div className="company-divider" />
-              )}
+            {!exactCompanyExists && (
+              <>
+                {filteredCompanies.length >
+                  0 && (
+                  <div className="company-divider" />
+                )}
 
-              <button
-                type="button"
-                className="company-create"
-                onClick={handleNewCompany}
-              >
-                <span className="company-create-icon">
-                  +
-                </span>
+                <button
+                  type="button"
+                  className="company-create"
+                  onClick={
+                    handleNewCompany
+                  }
+                >
+                  <span className="company-create-icon">
+                    +
+                  </span>
 
-                <span>
-                  Cadastrar{" "}
-                  <strong>
-                    &quot;{value.trim()}&quot;
-                  </strong>
-                </span>
-              </button>
-            </>
-          )}
-        </div>
-      )}
+                  <span>
+                    Cadastrar{" "}
+                    <strong>
+                      &quot;
+                      {value.trim()}
+                      &quot;
+                    </strong>
+                  </span>
+                </button>
+              </>
+            )}
+          </div>
+        )}
     </div>
   );
 }

@@ -129,6 +129,9 @@ body {
 
   font-size: 13px;
   font-weight: 600;
+
+  transition:
+    color 0.2s ease;
 }
 
 .form-field input {
@@ -165,6 +168,48 @@ body {
 
   box-shadow:
     0 0 0 3px rgba(11, 74, 125, 0.1);
+}
+
+/* ==========================================================================
+   VALIDAÇÃO DOS CAMPOS
+   ========================================================================== */
+
+/*
+ * Quando um campo possui erro:
+ *
+ * - o título fica vermelho;
+ * - a borda do campo fica vermelha;
+ * - uma mensagem é exibida abaixo;
+ * - ao receber foco, mantém o destaque vermelho.
+ */
+
+.form-field-error label {
+  color: #b42318;
+}
+
+.form-field-error input,
+.form-field-error input:hover {
+  border-color: #dc2626;
+}
+
+.form-field-error input:focus {
+  border-color: #dc2626;
+
+  box-shadow:
+    0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.form-field-error-message {
+  display: block;
+
+  margin-top: 1px;
+
+  color: #b42318;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  line-height: 1.4;
 }
 
 /* ==========================================================================
@@ -304,6 +349,112 @@ body {
 }
 
 /* ==========================================================================
+   NOTIFICAÇÃO FLUTUANTE DE ERRO
+   ========================================================================== */
+
+.registration-error {
+  position: fixed;
+
+  top: 20px;
+  left: 50%;
+
+  z-index: 5000;
+
+  width: calc(100% - 32px);
+  max-width: 500px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 12px 16px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+
+  background: #fffafa;
+
+  color: #b42318;
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.14);
+
+  transform: translateX(-50%);
+
+  animation:
+    registrationErrorAppear 0.25s ease-out;
+}
+
+.registration-error-icon {
+  flex: 0 0 auto;
+
+  width: 23px;
+  height: 23px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #b42318;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.registration-error-message {
+  flex: 1;
+}
+
+@keyframes registrationErrorAppear {
+  from {
+    opacity: 0;
+
+    transform:
+      translate(-50%, -10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate(-50%, 0);
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE - NOTIFICAÇÃO
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  .registration-error {
+    top: 12px;
+
+    width: calc(100% - 24px);
+
+    padding: 11px 13px;
+
+    font-size: 12px;
+  }
+
+  .registration-error-icon {
+    width: 21px;
+    height: 21px;
+
+    font-size: 12px;
+  }
+}
+
+/* ==========================================================================
    RESPONSIVIDADE
    ========================================================================== */
 
@@ -336,6 +487,10 @@ body {
     gap: 16px;
   }
 
+  .form-field-error-message {
+    font-size: 11px;
+  }
+
   .registration-admin-link {
     right: 16px;
     bottom: 16px;
@@ -351,6 +506,25 @@ body {
    ACESSIBILIDADE
    ========================================================================== */
 
+/*
+ * Mantém um destaque visível nos campos
+ * identificados como inválidos.
+ */
+.form-field input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.form-field input[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+
+  box-shadow:
+    0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/*
+ * Remove animações quando o dispositivo
+ * estiver configurado para reduzir movimento.
+ */
 @media (prefers-reduced-motion: reduce) {
   .form-field input,
   .registration-button,
@@ -364,5 +538,9 @@ body {
 
   .registration-admin-link:active {
     transform: none;
+  }
+
+  .registration-error {
+    animation: none;
   }
 }
