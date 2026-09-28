@@ -34,11 +34,26 @@ const TEST_LEVEL = 4;
 interface GameProps {
   participant: ParticipantData;
   onFinish: () => void;
+
+  /**
+   * Indica se a partida foi iniciada
+   * pela Área Administrativa.
+   */
+  isAdmin?: boolean;
+
+  /**
+   * Volta para a Área Administrativa.
+   * Utilizado somente antes da partida
+   * e somente pelo administrador.
+   */
+  onBack?: () => void;
 }
 
 export function Game({
   participant,
   onFinish,
+  isAdmin = false,
+  onBack,
 }: GameProps) {
   const [gameState, setGameState] =
     useState<GameState>({
@@ -666,13 +681,16 @@ export function Game({
 
       {/**
        * Instrucoes iniciais.
+       *
+       * A opcao de voltar aparece
+       * somente no modo administrativo.
        */}
       {gameState.status ===
         "instructions" && (
         <GameInstructions
-          onPlay={
-            startCountdown
-          }
+          onPlay={startCountdown}
+          isAdmin={isAdmin}
+          onBack={onBack}
         />
       )}
 

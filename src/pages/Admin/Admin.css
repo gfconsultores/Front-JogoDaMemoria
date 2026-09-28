@@ -1,0 +1,485 @@
+/* ==========================================================================
+   ÁREA ADMINISTRATIVA - DESAFIO GF
+   ========================================================================== */
+
+.admin-page {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  box-sizing: border-box;
+
+  background: #f4f7fb;
+}
+
+/* ==========================================================================
+   BOTÃO VOLTAR
+   CANTO SUPERIOR ESQUERDO
+   ========================================================================== */
+
+.admin-back {
+  position: fixed;
+
+  top: 20px;
+  left: 20px;
+
+  z-index: 100;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #dbe4ec;
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08);
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Linha principal da seta */
+.admin-back-icon {
+  position: relative;
+
+  display: block;
+
+  width: 15px;
+  height: 2px;
+
+  background: currentColor;
+
+  border-radius: 2px;
+}
+
+/* Ponta da seta */
+.admin-back-icon::before {
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 0;
+
+  width: 7px;
+  height: 7px;
+
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+
+  transform:
+    translateY(-50%)
+    rotate(45deg);
+
+  transform-origin: center;
+}
+
+.admin-back:hover {
+  color: #0b4a7d;
+
+  background: #ffffff;
+
+  border-color: #b8cddd;
+
+  transform: translateX(-2px);
+
+  box-shadow:
+    0 6px 16px rgba(11, 74, 125, 0.14);
+}
+
+.admin-back:active {
+  transform:
+    translateX(-1px)
+    scale(0.96);
+}
+
+.admin-back:focus {
+  outline: none;
+}
+
+.admin-back:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   PAINEL
+   ========================================================================== */
+
+.admin-panel {
+  width: 100%;
+  max-width: 560px;
+
+  padding: 40px 36px 32px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow:
+    0 15px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* ==========================================================================
+   CABEÇALHO
+   ========================================================================== */
+
+.admin-header {
+  margin-bottom: 30px;
+
+  text-align: center;
+}
+
+.admin-eyebrow {
+  display: block;
+
+  margin-bottom: 9px;
+
+  color: #0b4a7d;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
+
+  text-transform: uppercase;
+}
+
+.admin-header h1 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  line-height: 1.25;
+}
+
+.admin-header p {
+  margin: 9px 0 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   MENU
+   ========================================================================== */
+
+.admin-menu {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+/* ==========================================================================
+   OPÇÕES DO MENU
+   ========================================================================== */
+
+.admin-option {
+  width: 100%;
+  min-height: 78px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 14px 16px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  font-family: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-option:hover {
+  border-color: #b8cddd;
+
+  background: #f8fbfd;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 14px rgba(15, 23, 42, 0.06);
+}
+
+.admin-option:active {
+  transform: translateY(0);
+}
+
+.admin-option:focus {
+  outline: none;
+}
+
+.admin-option:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   ÍCONES
+   ========================================================================== */
+
+.admin-option-icon {
+  flex-shrink: 0;
+
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #eef5fa;
+
+  color: #0b4a7d;
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   TEXTO DAS OPÇÕES
+   ========================================================================== */
+
+.admin-option-content {
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.admin-option-content strong {
+  color: #0f172a;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-option-content span {
+  color: #64748b;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   SETA DAS OPÇÕES
+   ========================================================================== */
+
+.admin-option-arrow {
+  flex-shrink: 0;
+
+  color: #94a3b8;
+
+  font-size: 26px;
+  font-weight: 400;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-option:hover .admin-option-arrow {
+  color: #0b4a7d;
+
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
+
+.admin-footer {
+  margin-top: 26px;
+  padding-top: 22px;
+
+  border-top: 1px solid #e2e8f0;
+
+  text-align: center;
+}
+
+/* ==========================================================================
+   SAIR DA ÁREA ADMINISTRATIVA
+   ========================================================================== */
+
+.admin-logout {
+  padding: 8px 12px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #64748b;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.admin-logout:hover {
+  color: #b42318;
+
+  text-decoration: underline;
+}
+
+.admin-logout:focus {
+  outline: none;
+}
+
+.admin-logout:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 3px;
+
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   TABLET
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .admin-page {
+    padding:
+      76px
+      20px
+      24px;
+  }
+
+  .admin-back {
+    top: 16px;
+    left: 16px;
+  }
+}
+
+/* ==========================================================================
+   CELULAR
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  .admin-page {
+    padding:
+      70px
+      16px
+      16px;
+  }
+
+  .admin-panel {
+    padding: 32px 22px 26px;
+
+    border-radius: 16px;
+  }
+
+  .admin-header {
+    margin-bottom: 25px;
+  }
+
+  .admin-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-option {
+    min-height: 74px;
+
+    padding: 13px;
+  }
+
+  .admin-option-icon {
+    width: 40px;
+    height: 40px;
+
+    font-size: 19px;
+  }
+
+  .admin-option-content span {
+    font-size: 11px;
+  }
+
+  .admin-back {
+    top: 14px;
+    left: 14px;
+
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ==========================================================================
+   ACESSIBILIDADE
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-back,
+  .admin-option,
+  .admin-option-arrow,
+  .admin-logout {
+    transition: none;
+  }
+
+  .admin-back:hover,
+  .admin-back:active,
+  .admin-option:hover,
+  .admin-option:hover .admin-option-arrow {
+    transform: none;
+  }
+}

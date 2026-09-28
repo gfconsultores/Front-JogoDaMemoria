@@ -25,6 +25,8 @@
  */
 
 .game-instructions {
+  position: relative;
+
   width: 100%;
   max-width: 540px;
 
@@ -49,7 +51,129 @@
 
 
 /**
- * Icone de confirmacao.
+ * ==================================================
+ * BOTAO VOLTAR - SOMENTE ADMIN
+ * ==================================================
+ */
+
+.game-instructions-back {
+  position: absolute;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 10;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #dbe4ec;
+  border-radius: 50%;
+
+  background: #f8fafc;
+
+  color: #475569;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 10px rgba(15, 23, 42, 0.08);
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+/**
+ * Linha horizontal da seta.
+ */
+
+.game-instructions-back-icon {
+  position: relative;
+
+  display: block;
+
+  width: 15px;
+  height: 2px;
+
+  background: currentColor;
+
+  border-radius: 2px;
+}
+
+
+/**
+ * Ponta da seta.
+ */
+
+.game-instructions-back-icon::before {
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 0;
+
+  width: 7px;
+  height: 7px;
+
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+
+  transform:
+    translateY(-50%)
+    rotate(45deg);
+
+  transform-origin: center;
+}
+
+
+.game-instructions-back:hover {
+  color: #0b4a7d;
+
+  background: #eef5fa;
+
+  border-color: #b8cddd;
+
+  transform: translateX(-2px);
+
+  box-shadow:
+    0 5px 14px rgba(11, 74, 125, 0.14);
+}
+
+
+.game-instructions-back:active {
+  transform:
+    translateX(-1px)
+    scale(0.96);
+}
+
+
+.game-instructions-back:focus {
+  outline: none;
+}
+
+
+.game-instructions-back:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 3px;
+}
+
+
+/**
+ * ==================================================
+ * ICONE DE CONFIRMACAO
+ * ==================================================
  */
 
 .game-instructions-success {
@@ -73,7 +197,9 @@
 
 
 /**
- * Cadastro realizado.
+ * ==================================================
+ * CADASTRO / MODO ADMINISTRATIVO
+ * ==================================================
  */
 
 .game-instructions-eyebrow {
@@ -92,7 +218,9 @@
 
 
 /**
- * Titulo.
+ * ==================================================
+ * TITULO
+ * ==================================================
  */
 
 .game-instructions h2 {
@@ -106,7 +234,9 @@
 
 
 /**
- * Texto introdutorio.
+ * ==================================================
+ * TEXTO INTRODUTORIO
+ * ==================================================
  */
 
 .game-instructions-intro {
@@ -225,6 +355,19 @@
 
 
 /**
+ * Aviso no modo administrativo.
+ */
+
+.game-attempt-warning-admin {
+  background: #f0f7ff;
+
+  border-color: #bfdbfe;
+
+  color: #0b4a7d;
+}
+
+
+/**
  * ==================================================
  * BOTAO JOGAR
  * ==================================================
@@ -276,6 +419,17 @@
 }
 
 
+.game-instructions-button:focus {
+  outline: none;
+}
+
+
+.game-instructions-button:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 3px;
+}
+
+
 /**
  * ==================================================
  * ANIMACAO
@@ -285,12 +439,18 @@
 @keyframes instructionsAppear {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
+
+    transform:
+      translateY(12px)
+      scale(0.97);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
@@ -308,7 +468,13 @@
 
   .game-instructions {
     max-width: 520px;
+
     padding: 22px 25px 20px;
+  }
+
+  .game-instructions-back {
+    top: 16px;
+    left: 16px;
   }
 }
 
@@ -330,6 +496,18 @@
     padding: 18px 15px 16px;
 
     border-radius: 15px;
+  }
+
+  .game-instructions-back {
+    top: 12px;
+    left: 12px;
+
+    width: 36px;
+    height: 36px;
+  }
+
+  .game-instructions-back-icon {
+    width: 14px;
   }
 
   .game-instructions-success {
@@ -394,5 +572,30 @@
     min-height: 42px;
 
     font-size: 14px;
+  }
+}
+
+
+/**
+ * ==================================================
+ * ACESSIBILIDADE
+ * ==================================================
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .game-instructions {
+    animation: none;
+  }
+
+  .game-instructions-back,
+  .game-instructions-button {
+    transition: none;
+  }
+
+  .game-instructions-back:hover,
+  .game-instructions-back:active,
+  .game-instructions-button:hover,
+  .game-instructions-button:active {
+    transform: none;
   }
 }

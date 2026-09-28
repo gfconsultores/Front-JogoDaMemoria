@@ -1,0 +1,457 @@
+/**
+ * ==================================================
+ * TELA DE PARTICIPANTES - DESAFIO GF
+ * ==================================================
+ */
+
+.participants-page {
+  position: relative;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  padding: 40px 24px;
+
+  box-sizing: border-box;
+
+  background: #f4f7fb;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/**
+ * ==================================================
+ * BOTÃO VOLTAR
+ * ==================================================
+ */
+
+.participants-back {
+  position: fixed;
+
+  top: 20px;
+  left: 20px;
+
+  z-index: 100;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #dbe4ec;
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08);
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.participants-back-icon {
+  position: relative;
+
+  display: block;
+
+  width: 15px;
+  height: 2px;
+
+  background: currentColor;
+
+  border-radius: 2px;
+}
+
+.participants-back-icon::before {
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 0;
+
+  width: 7px;
+  height: 7px;
+
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+
+  transform:
+    translateY(-50%)
+    rotate(45deg);
+
+  transform-origin: center;
+}
+
+.participants-back:hover {
+  color: #0b4a7d;
+
+  background: #ffffff;
+
+  border-color: #b8cddd;
+
+  transform: translateX(-2px);
+
+  box-shadow:
+    0 6px 16px rgba(11, 74, 125, 0.14);
+}
+
+.participants-back:active {
+  transform:
+    translateX(-1px)
+    scale(0.96);
+}
+
+.participants-back:focus {
+  outline: none;
+}
+
+.participants-back:focus-visible {
+  outline: 2px solid #0b4a7d;
+  outline-offset: 3px;
+}
+
+/**
+ * ==================================================
+ * CONTAINER PRINCIPAL
+ * ==================================================
+ */
+
+.participants-container {
+  width: 100%;
+  max-width: 1100px;
+
+  background: #ffffff;
+
+  border: 1px solid #e4eaf1;
+  border-radius: 20px;
+
+  padding: 32px;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 18px 45px rgba(11, 49, 87, 0.08);
+}
+
+/**
+ * ==================================================
+ * CABEÇALHO
+ * ==================================================
+ */
+
+.participants-header {
+  margin-bottom: 28px;
+}
+
+.participants-header span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #147a4a;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.participants-header h1 {
+  margin: 0 0 8px;
+
+  color: #0b3157;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  line-height: 1.2;
+}
+
+.participants-header p {
+  margin: 0;
+
+  color: #667085;
+
+  font-size: 14px;
+}
+
+/**
+ * ==================================================
+ * SEM PARTICIPANTES
+ * ==================================================
+ */
+
+.participants-empty {
+  padding: 50px 20px;
+
+  border: 1px dashed #ccd6e0;
+  border-radius: 14px;
+
+  background: #f8fafc;
+
+  color: #667085;
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+/**
+ * ==================================================
+ * TABELA
+ * ==================================================
+ */
+
+.participants-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e3e9f0;
+  border-radius: 14px;
+}
+
+.participants-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  background: #ffffff;
+}
+
+.participants-table thead {
+  background: #0b3157;
+}
+
+.participants-table th {
+  padding: 15px 18px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  text-align: left;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.participants-table td {
+  padding: 16px 18px;
+
+  border-bottom: 1px solid #edf1f5;
+
+  color: #344054;
+
+  font-size: 14px;
+
+  vertical-align: middle;
+}
+
+.participants-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.participants-table tbody tr {
+  transition:
+    background-color 0.2s ease;
+}
+
+.participants-table tbody tr:hover {
+  background: #f7f9fc;
+}
+
+.participants-table td:first-child {
+  color: #0b3157;
+
+  font-weight: 700;
+}
+
+.participants-table td:last-child {
+  white-space: nowrap;
+}
+
+/**
+ * ==================================================
+ * TABLET
+ * ==================================================
+ */
+
+@media (max-width: 900px) {
+  .participants-page {
+    padding:
+      76px
+      16px
+      24px;
+  }
+
+  .participants-container {
+    padding: 26px 22px;
+  }
+
+  .participants-header h1 {
+    font-size: 26px;
+  }
+
+  .participants-back {
+    top: 16px;
+    left: 16px;
+  }
+}
+
+/**
+ * ==================================================
+ * CELULAR
+ * ==================================================
+ */
+
+@media (max-width: 600px) {
+  .participants-page {
+    padding:
+      70px
+      10px
+      12px;
+  }
+
+  .participants-container {
+    width: 100%;
+    min-width: 0;
+
+    padding: 20px 12px;
+
+    border-radius: 16px;
+  }
+
+  .participants-header {
+    margin-bottom: 20px;
+  }
+
+  .participants-header h1 {
+    font-size: 22px;
+  }
+
+  .participants-header p {
+    font-size: 13px;
+  }
+
+  /**
+   * A rolagem acontece somente dentro
+   * da área da tabela.
+   */
+  .participants-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #edf1f5;
+  }
+
+  /**
+   * Mantém as colunas com largura suficiente.
+   * O celular poderá deslizar para os lados.
+   */
+  .participants-table {
+    width: 100%;
+    min-width: 620px;
+  }
+
+  .participants-table th,
+  .participants-table td {
+    padding: 13px 14px;
+
+    white-space: nowrap;
+  }
+
+  /**
+   * Nome
+   */
+  .participants-table th:nth-child(1),
+  .participants-table td:nth-child(1) {
+    min-width: 150px;
+  }
+
+  /**
+   * Empresa
+   */
+  .participants-table th:nth-child(2),
+  .participants-table td:nth-child(2) {
+    min-width: 180px;
+  }
+
+  /**
+   * Telefone
+   */
+  .participants-table th:nth-child(3),
+  .participants-table td:nth-child(3) {
+    min-width: 150px;
+  }
+
+  /**
+   * Barra de rolagem horizontal.
+   */
+  .participants-table-wrapper::-webkit-scrollbar {
+    height: 7px;
+  }
+
+  .participants-table-wrapper::-webkit-scrollbar-track {
+    background: #edf1f5;
+    border-radius: 10px;
+  }
+
+  .participants-table-wrapper::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+  }
+
+  .participants-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  .participants-back {
+    top: 14px;
+    left: 14px;
+
+    width: 40px;
+    height: 40px;
+  }
+}
+/**
+ * ==================================================
+ * ACESSIBILIDADE
+ * ==================================================
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .participants-back,
+  .participants-table tbody tr {
+    transition: none;
+  }
+
+  .participants-back:hover,
+  .participants-back:active {
+    transform: none;
+  }
+}
