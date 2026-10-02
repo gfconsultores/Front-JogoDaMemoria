@@ -366,12 +366,12 @@ function App() {
    * e NÃO são gravados no cadastro.
    */
   function handlePlayAsGF() {
-    const adminParticipant: ParticipantData =
-      {
-        name: "Equipe GF",
-        company: "GF Consultores",
-        phone: "ADMIN",
-      };
+    const adminParticipant: ParticipantData = {
+      name: "Equipe GF",
+      company: "GF Consultores",
+      role: "Administrador",
+      phone: "ADMIN",
+    };
 
     setIsAdminGame(true);
 

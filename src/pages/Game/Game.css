@@ -31,10 +31,15 @@
  * ==================================================
  * TABULEIRO
  * ==================================================
+ *
+ * O Desafio GF possui 16 cartas,
+ * organizadas em uma grade 4 x 4.
  */
 
 .game-board {
   --gap: clamp(6px, 1.5vmin, 14px);
+  --board-columns: 4;
+  --board-rows: 4;
 
   --card-size: min(
     17vw,
@@ -52,7 +57,7 @@
 
   grid-template-columns:
     repeat(
-      var(--board-columns, 3),
+      var(--board-columns),
       var(--card-w)
     );
 
@@ -69,7 +74,7 @@
 
 /**
  * ==================================================
- * CRONOMETROS
+ * CRONÔMETROS
  * ==================================================
  */
 
@@ -103,7 +108,7 @@
 
 /**
  * ==================================================
- * MENSAGEM TEMPORARIA
+ * MENSAGEM TEMPORÁRIA
  * ==================================================
  */
 
@@ -201,10 +206,10 @@
       (
         100dvh -
         var(--reserved) -
-        (var(--board-rows, 4) - 1) *
+        (var(--board-rows) - 1) *
         var(--gap)
       ) /
-      var(--board-rows, 4)
+      var(--board-rows)
     );
 
 
@@ -213,10 +218,10 @@
         (
           100vw -
           2 * var(--page-padding) -
-          (var(--board-columns, 3) - 1) *
+          (var(--board-columns) - 1) *
           var(--gap)
         ) /
-        var(--board-columns, 3)
+        var(--board-columns)
       ),
       var(--avail-h),
       var(--max-card)
@@ -227,78 +232,6 @@
       var(--avail-h),
       calc(var(--card-w) * 1.4)
     );
-  }
-
-
-  /**
-   * 6 cartas
-   */
-  .game-board-6 {
-    --board-rows: 2;
-  }
-
-
-  /**
-   * 8 cartas
-   */
-  .game-board-8 {
-    --board-rows: 2;
-  }
-
-
-  /**
-   * ==================================================
-   * LEVEL 3 - 10 CARTAS
-   * ==================================================
-   *
-   * Mantem 5 x 2.
-   *
-   * Em tablets grandes, o tabuleiro utiliza
-   * aproximadamente 82% da largura da tela.
-   *
-   * As cartas crescem proporcionalmente,
-   * mas possuem limite de 175px.
-   */
-
-  .game-board-10 {
-    --board-columns: 5 !important;
-    --board-rows: 2;
-
-    --card-w: min(
-      calc(
-        (
-          82vw -
-          (4 * var(--gap))
-        ) / 5
-      ),
-      175px
-    );
-
-    --card-h: var(--card-w);
-  }
-
-
-  /**
-   * 12 cartas
-   */
-  .game-board-12 {
-    --board-rows: 3;
-  }
-
-
-  /**
-   * 16 cartas
-   */
-  .game-board-16 {
-    --board-rows: 4;
-  }
-
-
-  /**
-   * 20 cartas
-   */
-  .game-board-20 {
-    --board-rows: 4;
   }
 
 
@@ -317,7 +250,7 @@
 
 /**
  * ==================================================
- * TABLETS E TELAS ATE 900PX
+ * TABLETS E TELAS ATÉ 900PX
  * ==================================================
  */
 
@@ -346,10 +279,10 @@
       (
         100dvh -
         var(--reserved) -
-        (var(--board-rows, 4) - 1) *
+        (var(--board-rows) - 1) *
         var(--gap)
       ) /
-      var(--board-rows, 4)
+      var(--board-rows)
     );
 
 
@@ -358,10 +291,10 @@
         (
           100vw -
           2 * var(--page-padding) -
-          (var(--board-columns, 3) - 1) *
+          (var(--board-columns) - 1) *
           var(--gap)
         ) /
-        var(--board-columns, 3)
+        var(--board-columns)
       ),
       calc(var(--avail-h) * 1.1),
       var(--max-card)
@@ -376,61 +309,6 @@
 
     margin-top:
       clamp(10px, 1.5vh, 16px);
-  }
-
-
-  .game-board-6 {
-    --board-rows: 2;
-  }
-
-
-  .game-board-8 {
-    --board-rows: 2;
-  }
-
-
-  /**
-   * ==================================================
-   * LEVEL 3 - 10 CARTAS
-   * ==================================================
-   *
-   * Mantem 5 x 2.
-   *
-   * Em tablets menores utiliza aproximadamente
-   * 88% da largura disponivel.
-   */
-
-  .game-board-10 {
-    --board-columns: 5 !important;
-    --board-rows: 2;
-
-    --card-w: min(
-      calc(
-        (
-          88vw -
-          (4 * var(--gap))
-        ) / 5
-      ),
-      145px
-    );
-
-    --card-h: var(--card-w);
-  }
-
-
-  .game-board-12 {
-    --board-rows: 3;
-  }
-
-
-  .game-board-16 {
-    --board-rows: 4;
-  }
-
-
-  .game-board-20 {
-    --board-columns: 4 !important;
-    --board-rows: 5;
   }
 
 
@@ -481,35 +359,35 @@
       clamp(4px, 1.2vmin, 7px);
 
     --max-card: 120px;
-
     --reserved: 175px;
 
-    margin-top: 10px;
-  }
-
-
-  /**
-   * 10 cartas em celulares.
-   *
-   * Continua 5 x 2 e reduz
-   * automaticamente conforme a largura.
-   */
-
-  .game-board-10 {
-    --board-columns: 5 !important;
-    --board-rows: 2;
+    --avail-h: calc(
+      (
+        100dvh -
+        var(--reserved) -
+        (var(--board-rows) - 1) *
+        var(--gap)
+      ) /
+      var(--board-rows)
+    );
 
     --card-w: min(
       calc(
         (
-          94vw -
-          (4 * var(--gap))
-        ) / 5
+          100vw -
+          2 * var(--page-padding) -
+          (var(--board-columns) - 1) *
+          var(--gap)
+        ) /
+        var(--board-columns)
       ),
-      100px
+      var(--avail-h),
+      var(--max-card)
     );
 
     --card-h: var(--card-w);
+
+    margin-top: 10px;
   }
 
 
@@ -561,24 +439,24 @@
 
   .game-board {
     --gap: 4px;
-
     --max-card: 100px;
 
-    margin-top: 8px;
-  }
-
-
-  .game-board-10 {
-    --board-columns: 5 !important;
-    --board-rows: 2;
-
-    --card-w: calc(
-      (
-        96vw -
-        (4 * var(--gap))
-      ) / 5
+    --card-w: min(
+      calc(
+        (
+          100vw -
+          2 * var(--page-padding) -
+          (var(--board-columns) - 1) *
+          var(--gap)
+        ) /
+        var(--board-columns)
+      ),
+      var(--avail-h),
+      var(--max-card)
     );
 
     --card-h: var(--card-w);
+
+    margin-top: 8px;
   }
 }

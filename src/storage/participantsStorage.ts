@@ -7,14 +7,8 @@ export interface StoredParticipant {
 
   name: string;
   company: string;
+  role: string;
   phone: string;
-
-  levelReached: number | null;
-
-  result:
-    | "playing"
-    | "lost"
-    | "winner";
 
   createdAt: string;
 }
@@ -64,6 +58,9 @@ function normalizeCompany(
  * ==================================================
  * RETORNAR PARTICIPANTES
  * ==================================================
+ *
+ * Também mantém compatibilidade com participantes
+ * cadastrados antes da criação do campo Cargo.
  */
 export function getParticipants(): StoredParticipant[] {
   const data =
@@ -74,9 +71,43 @@ export function getParticipants(): StoredParticipant[] {
   }
 
   try {
-    return JSON.parse(
-      data
-    ) as StoredParticipant[];
+    const participants =
+      JSON.parse(data) as Array<
+        Partial<StoredParticipant> & {
+          id: string;
+          name: string;
+          company: string;
+          phone: string;
+          createdAt: string;
+        }
+      >;
+
+    return participants.map(
+      (participant) => ({
+        id:
+          participant.id,
+
+        name:
+          participant.name ?? "",
+
+        company:
+          participant.company ?? "",
+
+        /**
+         * Participantes antigos não possuem
+         * Cargo. Nesse caso utilizamos uma
+         * string vazia.
+         */
+        role:
+          participant.role ?? "",
+
+        phone:
+          participant.phone ?? "",
+
+        createdAt:
+          participant.createdAt,
+      })
+    );
   } catch {
     return [];
   }
@@ -86,6 +117,11 @@ export function getParticipants(): StoredParticipant[] {
  * ==================================================
  * VERIFICAR TELEFONE CADASTRADO
  * ==================================================
+ *
+ * Como cada participante possui direito
+ * a apenas uma participação, a existência
+ * do telefone no cadastro impede uma nova
+ * tentativa.
  */
 export function participantPhoneExists(
   phone: string
@@ -139,10 +175,17 @@ export function getCompanyParticipantCount(
  * ==================================================
  * SALVAR PARTICIPANTE
  * ==================================================
+ *
+ * O participante é registrado antes
+ * do início da partida.
+ *
+ * Não é armazenado resultado de vitória
+ * ou derrota.
  */
 export function saveParticipant(participant: {
   name: string;
   company: string;
+  role: string;
   phone: string;
 }): StoredParticipant {
   const participants =
@@ -174,14 +217,17 @@ export function saveParticipant(participant: {
       participant.name.trim(),
 
     company:
-      participant.company.trim(),
+      participant.company
+        .trim()
+        .replace(/\s+/g, " "),
+
+    role:
+      participant.role
+        .trim()
+        .replace(/\s+/g, " "),
 
     phone:
       normalizedPhone,
-
-    levelReached: null,
-
-    result: "playing",
 
     createdAt:
       new Date().toISOString(),
@@ -210,20 +256,20 @@ export function saveParticipant(participant: {
  *
  * - Nome
  * - Empresa
+ * - Cargo
  * - Telefone
  *
  * Preserva:
  *
  * - ID
  * - Data de cadastro
- * - Resultado
- * - Nível alcançado
  */
 export function updateParticipant(
   id: string,
   data: {
     name: string;
     company: string;
+    role: string;
     phone: string;
   }
 ): StoredParticipant {
@@ -274,7 +320,7 @@ export function updateParticipant(
 
   /**
    * Criamos a versão atualizada mantendo
-   * todos os demais dados originais.
+   * os demais dados originais.
    */
   const updatedParticipant: StoredParticipant = {
     ...participants[
@@ -285,7 +331,14 @@ export function updateParticipant(
       data.name.trim(),
 
     company:
-      data.company.trim(),
+      data.company
+        .trim()
+        .replace(/\s+/g, " "),
+
+    role:
+      data.role
+        .trim()
+        .replace(/\s+/g, " "),
 
     phone:
       normalizedPhone,
@@ -303,47 +356,4 @@ export function updateParticipant(
   );
 
   return updatedParticipant;
-}
-
-/**
- * ==================================================
- * ATUALIZAR RESULTADO
- * ==================================================
- */
-export function updateParticipantResult(
-  phone: string,
-  levelReached: number,
-  result: "lost" | "winner"
-): void {
-  const participants =
-    getParticipants();
-
-  const normalizedPhone =
-    normalizePhone(phone);
-
-  const updatedParticipants =
-    participants.map(
-      (participant) => {
-        if (
-          normalizePhone(
-            participant.phone
-          ) !== normalizedPhone
-        ) {
-          return participant;
-        }
-
-        return {
-          ...participant,
-          levelReached,
-          result,
-        };
-      }
-    );
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(
-      updatedParticipants
-    )
-  );
 }

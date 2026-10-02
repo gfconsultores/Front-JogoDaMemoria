@@ -17,6 +17,7 @@ import "./Registration.css";
 export interface ParticipantData {
   name: string;
   company: string;
+  role: string;
   phone: string;
 }
 
@@ -31,6 +32,7 @@ interface RegistrationProps {
 interface FieldErrors {
   name?: string;
   company?: string;
+  role?: string;
   phone?: string;
 }
 
@@ -41,12 +43,14 @@ interface FieldErrors {
 interface InvalidFields {
   name: boolean;
   company: boolean;
+  role: boolean;
   phone: boolean;
 }
 
 const INITIAL_INVALID_FIELDS: InvalidFields = {
   name: false,
   company: false,
+  role: false,
   phone: false,
 };
 
@@ -56,13 +60,11 @@ export function Registration({
 }: RegistrationProps) {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
   const [phone, setPhone] = useState("");
 
   /**
    * Mensagem geral.
-   *
-   * Utilizada principalmente quando todos
-   * os campos estão vazios.
    */
   const [error, setError] = useState("");
 
@@ -144,10 +146,6 @@ export function Registration({
    * ==================================================
    * LIMPAR ERRO DE UM CAMPO
    * ==================================================
-   *
-   * Quando o participante começa a corrigir
-   * determinado campo, o erro daquele campo
-   * desaparece.
    */
   function clearFieldError(
     field: keyof FieldErrors
@@ -167,11 +165,6 @@ export function Registration({
       [field]: false,
     }));
 
-    /**
-     * Caso o aviso geral esteja aparecendo,
-     * ele desaparece assim que o participante
-     * começa a preencher algum campo.
-     */
     if (error) {
       setError("");
     }
@@ -187,9 +180,6 @@ export function Registration({
   ) {
     event.preventDefault();
 
-    /**
-     * Limpa validações anteriores.
-     */
     setError("");
     setFieldErrors({});
     setInvalidFields(
@@ -204,6 +194,11 @@ export function Registration({
         .trim()
         .replace(/\s+/g, " ");
 
+    const cleanRole =
+      role
+        .trim()
+        .replace(/\s+/g, " ");
+
     const cleanPhone =
       phone.replace(/\D/g, "");
 
@@ -211,21 +206,17 @@ export function Registration({
      * ==================================================
      * TODOS OS CAMPOS VAZIOS
      * ==================================================
-     *
-     * Quando tudo está vazio:
-     *
-     * - mostramos apenas uma mensagem no topo;
-     * - os três campos ficam vermelhos;
-     * - não mostramos três mensagens individuais.
      */
     if (
       !cleanName &&
       !cleanCompany &&
+      !cleanRole &&
       !cleanPhone
     ) {
       setInvalidFields({
         name: true,
         company: true,
+        role: true,
         phone: true,
       });
 
@@ -240,16 +231,13 @@ export function Registration({
      * ==================================================
      * CAMPOS OBRIGATÓRIOS
      * ==================================================
-     *
-     * Caso algum campo já esteja preenchido,
-     * os campos restantes mostram somente
-     * seus respectivos erros.
      */
     const requiredErrors: FieldErrors = {};
 
     const requiredInvalidFields: InvalidFields = {
       name: false,
       company: false,
+      role: false,
       phone: false,
     };
 
@@ -266,6 +254,14 @@ export function Registration({
         "Campo obrigatório.";
 
       requiredInvalidFields.company =
+        true;
+    }
+
+    if (!cleanRole) {
+      requiredErrors.role =
+        "Campo obrigatório.";
+
+      requiredInvalidFields.role =
         true;
     }
 
@@ -305,6 +301,7 @@ export function Registration({
       setInvalidFields({
         name: false,
         company: false,
+        role: false,
         phone: true,
       });
 
@@ -315,9 +312,6 @@ export function Registration({
      * ==================================================
      * TELEFONE JÁ CADASTRADO
      * ==================================================
-     *
-     * Cada telefone pode participar
-     * apenas uma vez.
      */
     if (
       participantPhoneExists(
@@ -332,6 +326,7 @@ export function Registration({
       setInvalidFields({
         name: false,
         company: false,
+        role: false,
         phone: true,
       });
 
@@ -342,9 +337,6 @@ export function Registration({
      * ==================================================
      * LIMITE DE PARTICIPANTES POR EMPRESA
      * ==================================================
-     *
-     * Cada empresa pode possuir no máximo
-     * 3 participantes.
      */
     const companyParticipantCount =
       getCompanyParticipantCount(
@@ -362,6 +354,7 @@ export function Registration({
       setInvalidFields({
         name: false,
         company: true,
+        role: false,
         phone: false,
       });
 
@@ -376,6 +369,7 @@ export function Registration({
     const participant: ParticipantData = {
       name: cleanName,
       company: cleanCompany,
+      role: cleanRole,
       phone: cleanPhone,
     };
 
@@ -389,10 +383,6 @@ export function Registration({
         participant
       );
     } catch (saveError) {
-      /**
-       * Proteção adicional para impedir
-       * telefone duplicado.
-       */
       if (
         saveError instanceof Error &&
         saveError.message ===
@@ -406,15 +396,13 @@ export function Registration({
         setInvalidFields({
           name: false,
           company: false,
+          role: false,
           phone: true,
         });
 
         return;
       }
 
-      /**
-       * Erro inesperado de armazenamento.
-       */
       setError(
         "Não foi possível realizar o cadastro. Tente novamente."
       );
@@ -427,9 +415,6 @@ export function Registration({
       participant
     );
 
-    /**
-     * Continua o fluxo normal do jogo.
-     */
     onSuccess(
       participant
     );
@@ -590,6 +575,57 @@ export function Registration({
                   role="alert"
                 >
                   {fieldErrors.company}
+                </span>
+              )}
+            </div>
+
+            {/* ======================================= */}
+            {/* CARGO */}
+            {/* ======================================= */}
+
+            <div
+              className={`form-field ${
+                invalidFields.role
+                  ? "form-field-error"
+                  : ""
+              }`}
+            >
+              <label htmlFor="player-role">
+                Cargo
+              </label>
+
+              <input
+                id="player-role"
+                type="text"
+                value={role}
+                onChange={(event) => {
+                  setRole(
+                    event.target.value
+                  );
+
+                  clearFieldError(
+                    "role"
+                  );
+                }}
+                placeholder="Digite seu cargo"
+                autoComplete="organization-title"
+                aria-invalid={
+                  invalidFields.role
+                }
+                aria-describedby={
+                  fieldErrors.role
+                    ? "player-role-error"
+                    : undefined
+                }
+              />
+
+              {fieldErrors.role && (
+                <span
+                  id="player-role-error"
+                  className="form-field-error-message"
+                  role="alert"
+                >
+                  {fieldErrors.role}
                 </span>
               )}
             </div>

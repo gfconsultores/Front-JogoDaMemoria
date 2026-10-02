@@ -50,7 +50,7 @@
 
 
 /**
- * Icone superior.
+ * Ícone superior.
  */
 .game-result-icon {
   width: 46px;
@@ -73,7 +73,7 @@
 
 
 /**
- * Pequeno titulo superior.
+ * Pequeno título superior.
  */
 .game-result-eyebrow {
   display: block;
@@ -91,7 +91,7 @@
 
 
 /**
- * Nome do participante.
+ * Título principal do resultado.
  */
 .game-result-modal h2 {
   margin: 0;
@@ -117,25 +117,8 @@
 
 
 /**
- * Destaque do nivel alcancado.
- */
-.game-result-level {
-  margin: 7px auto 17px;
-
-  color: #0b3157;
-
-  font-size: 32px;
-  font-weight: 900;
-
-  line-height: 1;
-
-  letter-spacing: 0.5px;
-}
-
-
-/**
- * Botao que encerra a participacao
- * e libera o sistema para o proximo jogador.
+ * Botão que encerra a participação
+ * e libera o sistema para o próximo jogador.
  */
 .game-result-button {
   width: 100%;
@@ -182,7 +165,7 @@
 
 
 /**
- * Animacao de entrada.
+ * Animação de entrada.
  */
 @keyframes gameResultAppear {
   from {
@@ -238,12 +221,6 @@
 
   .game-result-message {
     font-size: 13px;
-  }
-
-  .game-result-level {
-    font-size: 29px;
-
-    margin-bottom: 15px;
   }
 
   .game-result-button {

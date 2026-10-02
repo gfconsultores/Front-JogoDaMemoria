@@ -4,36 +4,26 @@ import "./GameResultModal.css";
 
 interface GameResultModalProps {
   participant: ParticipantData;
-  level: number;
   completedGame: boolean;
+  isAdmin: boolean;
   onFinish: () => void;
 }
 
 export function GameResultModal({
   participant,
-  level,
   completedGame,
+  isAdmin,
   onFinish,
 }: GameResultModalProps) {
   /**
    * Primeiro nome do participante.
+   *
+   * Utilizado somente nas partidas
+   * de participantes cadastrados.
    */
   const firstName =
     participant.name.trim().split(/\s+/)[0] ||
     "Participante";
-
-  /**
-   * Ultimo nivel existente no jogo.
-   */
-  const FINAL_LEVEL = 10;
-
-  /**
-   * Participante chegou ao nivel final,
-   * mas nao conseguiu conclui-lo.
-   */
-  const lostOnFinalLevel =
-    level === FINAL_LEVEL &&
-    !completedGame;
 
   return (
     <div className="game-result-overlay">
@@ -49,35 +39,22 @@ export function GameResultModal({
         </span>
 
         <h2>
-          {completedGame
-            ? `Parabéns, ${firstName}!`
-            : `${firstName}, obrigado por participar!`}
+          {isAdmin
+            ? "Obrigado por participar!"
+            : completedGame
+              ? `Parabéns, ${firstName}!`
+              : `${firstName}, obrigado por participar!`}
         </h2>
 
         {completedGame ? (
-          /**
-           * Concluiu o nivel final.
-           */
           <p className="game-result-message">
-            Você concluiu todos os níveis do
-            Desafio GF!
+            Você concluiu o Desafio GF!
           </p>
         ) : (
-          <>
-            <p className="game-result-message">
-              Você alcançou o
-            </p>
-
-            <div className="game-result-level">
-              NÍVEL {level}
-            </div>
-
-            <p className="game-result-message">
-              {lostOnFinalLevel
-                ? "Você chegou ao nível final, mas não conseguiu concluir o Desafio GF."
-                : "Você não chegou ao nível final do Desafio GF."}
-            </p>
-          </>
+          <p className="game-result-message">
+            Não foi dessa vez, mas agradecemos
+            pela sua participação no Desafio GF!
+          </p>
         )}
 
         <button

@@ -1,10 +1,12 @@
 /**
- * Define a aparencia das informacoes exibidas durante cada nivel.
- * Organiza o numero do nivel e a mensagem referente
- * ao estado atual do jogo.
+ * Define a aparência das informações
+ * exibidas durante o Desafio GF.
+ *
+ * Organiza o título do desafio e a mensagem
+ * referente ao estado atual da partida.
  */
 
-.level-info {
+.game-info {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,18 +19,21 @@
   text-align: center;
 }
 
-
 /**
- * Numero do nivel.
+ * Título do desafio.
  */
-.level-number {
+.game-info-title {
   font-size: clamp(36px, 4.5vmin, 48px);
   font-weight: 700;
   line-height: 1.1;
   color: #0b3157;
 }
 
-.level-status {
+/**
+ * Mensagem referente ao estado
+ * atual da partida.
+ */
+.game-info-status {
   font-size: clamp(21px, 2.7vmin, 28px);
   font-weight: 500;
   line-height: 1.2;
@@ -38,21 +43,21 @@
 /**
  * Telas menores.
  *
- * Mantemos tamanhos confortaveis em vez de
- * reduzir excessivamente o cabecalho.
+ * Mantemos tamanhos confortáveis em vez de
+ * reduzir excessivamente o cabeçalho.
  */
 @media (max-width: 600px) {
-  .level-info {
+  .game-info {
     gap: 4px;
 
     margin-bottom: 8px;
   }
 
-  .level-number {
+  .game-info-title {
     font-size: clamp(28px, 7vw, 36px);
   }
 
-  .level-status {
+  .game-info-status {
     font-size: clamp(17px, 4.5vw, 22px);
   }
 }

@@ -67,8 +67,8 @@ export function GameInstructions({
               </strong>
 
               <p>
-                No início de cada nível, você terá alguns
-                segundos para memorizar a posição das cartas.
+                Você terá 15 segundos para memorizar
+                a posição das cartas antes do desafio começar.
               </p>
             </div>
           </div>
@@ -84,8 +84,8 @@ export function GameInstructions({
               </strong>
 
               <p>
-                Depois da memorização, encontre todos os pares
-                antes que o tempo termine.
+                Depois da memorização, você terá 35 segundos
+                para encontrar todos os pares.
               </p>
             </div>
           </div>
@@ -101,8 +101,8 @@ export function GameInstructions({
               </strong>
 
               <p>
-                Cada combinação incorreta faz você perder
-                uma vida.
+                Você começa com 5 vidas. Cada combinação
+                incorreta faz você perder uma vida.
               </p>
             </div>
           </div>
@@ -118,8 +118,8 @@ export function GameInstructions({
               </strong>
 
               <p>
-                Se o tempo acabar ou você perder todas as
-                vidas, sua participação termina.
+                Encontre todos os pares antes que o tempo
+                termine e sem perder todas as vidas.
               </p>
             </div>
           </div>

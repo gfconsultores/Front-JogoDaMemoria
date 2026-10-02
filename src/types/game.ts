@@ -1,11 +1,10 @@
 /**
  * Define as estruturas de dados utilizadas
- * na logica do jogo da memoria.
+ * na lógica do jogo da memória.
  *
- * Este arquivo contem apenas tipos
- * relacionados diretamente a partida.
+ * Este arquivo contém apenas tipos
+ * relacionados diretamente à partida.
  */
-
 
 /**
  * Estrutura de uma carta do jogo.
@@ -18,24 +17,24 @@ export interface MemoryCard {
   isMatched: boolean;
 }
 
-
 /**
- * Configuracao de cada nivel.
+ * Configuração única do Desafio GF.
+ *
+ * Como o jogo não possui mais níveis,
+ * esta estrutura contém apenas as regras
+ * necessárias para a partida.
  */
-export interface LevelConfig {
-  level: number;
+export interface GameConfig {
   pairs: number;
   memorizeTime: number;
   playTime: number;
   maxErrors: number;
 }
 
-
 /**
  * Estado atual da partida.
  */
 export interface GameState {
-  level: number;
   errors: number;
 
   status:
@@ -44,6 +43,6 @@ export interface GameState {
     | "countdown"
     | "memorizing"
     | "playing"
-    | "levelComplete"
+    | "challengeComplete"
     | "gameOver";
 }

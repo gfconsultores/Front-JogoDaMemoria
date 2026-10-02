@@ -77,6 +77,7 @@ export function Participants({
                 <tr>
                   <th>Nome</th>
                   <th>Empresa</th>
+                  <th>Cargo</th>
                   <th>Telefone</th>
                 </tr>
               </thead>
@@ -93,6 +94,10 @@ export function Participants({
 
                       <td>
                         {participant.company}
+                      </td>
+
+                      <td>
+                        {participant.role || "—"}
                       </td>
 
                       <td>

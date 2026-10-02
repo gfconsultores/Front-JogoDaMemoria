@@ -66,6 +66,7 @@ function createParticipantsData(
     Nº: index + 1,
     Nome: participant.name,
     Empresa: participant.company,
+    Cargo: participant.role,
     Telefone: formatPhone(participant.phone),
   }));
 }
@@ -137,11 +138,14 @@ export function exportParticipantsToExcel(): boolean {
 
   /**
    * Largura das colunas.
+   *
+   * Nº | Nome | Empresa | Cargo | Telefone
    */
   participantsSheet["!cols"] = [
     { wch: 6 },
     { wch: 32 },
     { wch: 32 },
+    { wch: 26 },
     { wch: 20 },
   ];
 

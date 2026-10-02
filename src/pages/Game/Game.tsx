@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
 
 import { Card } from "../../components/Card/Card";
-import { LevelInfo } from "../../components/LevelInfo/LevelInfo";
+import { GameInfo } from "../../components/GameInfo/GameInfo";
 import { Lives } from "../../components/Lives/Lives";
-import { GameModal } from "../../components/GameModal/GameModal";
 import { GameInstructions } from "../../components/GameInstructions/GameInstructions";
 import { GameCountdown } from "../../components/GameCountdown/GameCountdown";
 import { GameResultModal } from "../../components/GameResultModal/GameResultModal";
 
-import { levels } from "../../game/levels";
+import { gameConfig } from "../../game/gameConfig";
 import { shuffleArray } from "../../game/shuffle";
+
+import {
+  hasPlayerLost,
+  isChallengeComplete,
+  isPair,
+} from "../../game/gameRules";
 
 import type {
   GameState,
@@ -20,16 +24,6 @@ import type {
 import type { ParticipantData } from "../Registration/Registration";
 
 import "./Game.css";
-
-/**
- * Nivel usado apenas durante o desenvolvimento.
- *
- * Altere este valor para testar diretamente
- * qualquer nivel do jogo.
- *
- * Antes da versao final, voltar para o nivel 1.
- */
-const TEST_LEVEL = 1;
 
 interface GameProps {
   participant: ParticipantData;
@@ -55,53 +49,63 @@ export function Game({
   isAdmin = false,
   onBack,
 }: GameProps) {
+  /**
+   * Estado atual da partida.
+   */
   const [gameState, setGameState] =
     useState<GameState>({
-      level: TEST_LEVEL,
       errors: 0,
       status: "instructions",
     });
 
   /**
-   * Identifica cada nova execucao do nivel.
-   *
-   * Utilizado principalmente durante
-   * o desenvolvimento.
+   * Cartas presentes no tabuleiro.
    */
-  const [roundId] = useState(0);
-
-  const levelConfig = levels.find(
-    (config) =>
-      config.level === gameState.level
-  );
-
   const [cards, setCards] =
     useState<MemoryCard[]>([]);
 
+  /**
+   * IDs das cartas atualmente selecionadas.
+   */
   const [
     selectedCards,
     setSelectedCards,
   ] = useState<number[]>([]);
 
+  /**
+   * Impede novos cliques enquanto
+   * duas cartas estão sendo verificadas.
+   */
   const [isChecking, setIsChecking] =
     useState(false);
 
+  /**
+   * Tempo restante da etapa
+   * de memorização.
+   */
   const [
     memorizeSeconds,
     setMemorizeSeconds,
   ] = useState(0);
 
+  /**
+   * Tempo restante da partida.
+   */
   const [
     playSeconds,
     setPlaySeconds,
   ] = useState(0);
 
+  /**
+   * Mensagem temporária exibida
+   * após uma tentativa incorreta.
+   */
   const [message, setMessage] =
     useState("");
 
   /**
-   * Sai das instrucoes e inicia
-   * a contagem 3, 2, 1, JA!
+   * Sai das instruções e inicia
+   * a contagem 3, 2, 1, JÁ!
    */
   function startCountdown() {
     setGameState((previous) => ({
@@ -122,16 +126,12 @@ export function Game({
   }
 
   /**
-   * Prepara o nivel atual.
+   * Prepara o Desafio GF.
    *
-   * Este efeito somente e executado
-   * quando o jogo entra em "memorizing".
+   * Este efeito é executado quando
+   * o jogo entra na etapa de memorização.
    */
   useEffect(() => {
-    if (!levelConfig) {
-      return;
-    }
-
     if (
       gameState.status !== "memorizing"
     ) {
@@ -139,7 +139,7 @@ export function Game({
     }
 
     const newCards = createCards(
-      levelConfig.pairs
+      gameConfig.pairs
     );
 
     setCards(newCards);
@@ -148,22 +148,22 @@ export function Game({
     setMessage("");
 
     /**
-     * Define os cronometros iniciais.
+     * Define os cronômetros iniciais.
      */
     setMemorizeSeconds(
       Math.ceil(
-        levelConfig.memorizeTime / 1000
+        gameConfig.memorizeTime / 1000
       )
     );
 
     setPlaySeconds(
       Math.ceil(
-        levelConfig.playTime / 1000
+        gameConfig.playTime / 1000
       )
     );
 
     /**
-     * Contagem regressiva da memorizacao.
+     * Contagem regressiva da memorização.
      */
     const countdown =
       window.setInterval(() => {
@@ -177,7 +177,7 @@ export function Game({
       }, 1000);
 
     /**
-     * Finaliza a etapa de memorizacao.
+     * Finaliza a etapa de memorização.
      */
     const timer = window.setTimeout(
       () => {
@@ -187,6 +187,10 @@ export function Game({
 
         setMemorizeSeconds(0);
 
+        /**
+         * Vira todas as cartas para baixo
+         * ao terminar a memorização.
+         */
         setCards(
           (currentCards) =>
             currentCards.map(
@@ -198,8 +202,8 @@ export function Game({
         );
 
         /**
-         * Somente agora o tempo
-         * da partida comeca.
+         * Inicia a etapa principal
+         * da partida.
          */
         setGameState(
           (previous) => ({
@@ -208,23 +212,18 @@ export function Game({
           })
         );
       },
-      levelConfig.memorizeTime
+      gameConfig.memorizeTime
     );
 
     return () => {
       window.clearTimeout(timer);
       window.clearInterval(countdown);
     };
-  }, [
-    gameState.level,
-    gameState.status,
-    levelConfig,
-    roundId,
-  ]);
+  }, [gameState.status]);
 
   /**
-   * Cronometro do tempo disponivel
-   * para jogar.
+   * Cronômetro do tempo disponível
+   * para concluir o desafio.
    */
   useEffect(() => {
     if (
@@ -250,7 +249,8 @@ export function Game({
   }, [gameState.status]);
 
   /**
-   * Verifica se o tempo da partida acabou.
+   * Encerra a participação caso
+   * o tempo da partida termine.
    */
   useEffect(() => {
     if (
@@ -274,8 +274,8 @@ export function Game({
   ]);
 
   /**
-   * Faz a mensagem de erro desaparecer
-   * automaticamente depois de 1,5 segundo.
+   * Remove automaticamente a mensagem
+   * de erro depois de 1,5 segundo.
    */
   useEffect(() => {
     if (!message) {
@@ -298,12 +298,20 @@ export function Game({
   function handleCardClick(
     cardId: number
   ) {
+    /**
+     * Cartas somente podem ser selecionadas
+     * durante a etapa principal da partida.
+     */
     if (
       gameState.status !== "playing"
     ) {
       return;
     }
 
+    /**
+     * Impede novos cliques enquanto
+     * um par está sendo verificado.
+     */
     if (isChecking) {
       return;
     }
@@ -317,14 +325,25 @@ export function Game({
       return;
     }
 
+    /**
+     * Não permite selecionar novamente
+     * uma carta já virada.
+     */
     if (clickedCard.isFlipped) {
       return;
     }
 
+    /**
+     * Não permite selecionar novamente
+     * uma carta cujo par já foi encontrado.
+     */
     if (clickedCard.isMatched) {
       return;
     }
 
+    /**
+     * Vira a carta selecionada.
+     */
     setCards(
       (currentCards) =>
         currentCards.map(
@@ -345,6 +364,10 @@ export function Game({
 
     setSelectedCards(newSelection);
 
+    /**
+     * Quando duas cartas forem selecionadas,
+     * verifica se formam um par.
+     */
     if (
       newSelection.length === 2
     ) {
@@ -385,10 +408,15 @@ export function Game({
 
     /**
      * ACERTO
+     *
+     * A regra de comparação dos pares
+     * fica centralizada em gameRules.ts.
      */
     if (
-      firstCard.pairId ===
-      secondCard.pairId
+      isPair(
+        firstCard,
+        secondCard
+      )
     ) {
       window.setTimeout(() => {
         setCards(
@@ -396,36 +424,36 @@ export function Game({
             const updatedCards =
               currentCards.map(
                 (card) =>
-                  card.id ===
-                    firstId ||
-                  card.id ===
-                    secondId
+                  card.id === firstId ||
+                  card.id === secondId
                     ? {
                         ...card,
-                        isFlipped:
-                          true,
-                        isMatched:
-                          true,
+                        isFlipped: true,
+                        isMatched: true,
                       }
                     : card
               );
 
             /**
-             * Verifica se todos os pares
+             * Verifica através de gameRules.ts
+             * se todos os pares do desafio
              * foram encontrados.
              */
-            const levelCompleted =
-              updatedCards.every(
-                (card) =>
-                  card.isMatched
+            const challengeCompleted =
+              isChallengeComplete(
+                updatedCards
               );
 
-            if (levelCompleted) {
+            /**
+             * Todos os pares encontrados:
+             * Desafio GF concluído.
+             */
+            if (challengeCompleted) {
               setGameState(
                 (previous) => {
                   /**
-                   * Evita concluir o nivel
-                   * depois de um Game Over.
+                   * Evita alterar o estado caso
+                   * a partida já tenha terminado.
                    */
                   if (
                     previous.status !==
@@ -437,7 +465,7 @@ export function Game({
                   return {
                     ...previous,
                     status:
-                      "levelComplete",
+                      "challengeComplete",
                   };
                 }
               );
@@ -460,6 +488,10 @@ export function Game({
      * ERRO
      */
     window.setTimeout(() => {
+      /**
+       * Vira novamente para baixo
+       * as duas cartas incorretas.
+       */
       setCards(
         (currentCards) =>
           currentCards.map(
@@ -476,10 +508,10 @@ export function Game({
 
       setGameState(
         (previous) => {
-          if (!levelConfig) {
-            return previous;
-          }
-
+          /**
+           * Evita contabilizar erro caso
+           * a partida já tenha terminado.
+           */
           if (
             previous.status !==
             "playing"
@@ -492,19 +524,21 @@ export function Game({
 
           const remainingLives =
             Math.max(
-              levelConfig.maxErrors -
+              gameConfig.maxErrors -
                 newErrors,
               0
             );
 
           /**
-           * Ultima vida perdida.
-           *
-           * A participacao termina
-           * definitivamente.
+           * Verifica através de gameRules.ts
+           * se o participante atingiu
+           * o limite máximo de erros.
            */
           if (
-            remainingLives === 0
+            hasPlayerLost(
+              newErrors,
+              gameConfig.maxErrors
+            )
           ) {
             setMessage("");
 
@@ -517,7 +551,7 @@ export function Game({
 
           /**
            * Enquanto ainda houver vidas,
-           * mostra um aviso temporario.
+           * mostra um aviso temporário.
            */
           setMessage(
             `Não foi dessa vez! Preste atenção. Restam ${remainingLives} ${
@@ -540,71 +574,9 @@ export function Game({
   }
 
   /**
-   * Avanca para o proximo nivel.
-   *
-   * As instrucoes iniciais nao aparecem
-   * novamente entre os niveis.
-   */
-  function nextLevel() {
-    const nextLevelNumber =
-      gameState.level + 1;
-
-    if (
-      nextLevelNumber >
-      levels.length
-    ) {
-      return;
-    }
-
-    setMessage("");
-    setSelectedCards([]);
-    setIsChecking(false);
-
-    setGameState(
-      (previous) => ({
-        ...previous,
-        level:
-          nextLevelNumber,
-        errors: 0,
-        status: "memorizing",
-      })
-    );
-  }
-
-  /**
-   * Caso exista algum problema
-   * na configuracao do nivel.
-   */
-  if (!levelConfig) {
-    return (
-      <div>
-        Configuração do nível não encontrada.
-      </div>
-    );
-  }
-
-  /**
-   * Verifica se estamos no ultimo
-   * nivel configurado no jogo.
-   */
-  const isLastLevel =
-    gameState.level ===
-    levels.length;
-
-  /**
-   * Quantidade total de cartas
-   * do nivel atual.
-   */
-  const cardCount =
-    cards.length;
-
-  const boardColumns =
-    getBoardColumns(cardCount);
-
-  /**
-   * O conteudo real da partida
-   * somente aparece depois das
-   * instrucoes e da contagem inicial.
+   * O tabuleiro somente aparece
+   * depois das instruções e
+   * da contagem inicial.
    */
   const showGameContent =
     gameState.status !==
@@ -616,10 +588,14 @@ export function Game({
     <main className="game">
       {showGameContent && (
         <>
-          <LevelInfo
+          <GameInfo
             gameState={gameState}
           />
 
+          {/**
+           * Cronômetro da etapa
+           * de memorização.
+           */}
           {gameState.status ===
             "memorizing" && (
             <div className="memorize-timer">
@@ -628,6 +604,9 @@ export function Game({
             </div>
           )}
 
+          {/**
+           * Cronômetro da partida.
+           */}
           {gameState.status ===
             "playing" && (
             <div className="play-timer">
@@ -638,30 +617,35 @@ export function Game({
             </div>
           )}
 
+          {/**
+           * Vidas disponíveis.
+           */}
           <Lives
             errors={
               gameState.errors
             }
             maxErrors={
-              levelConfig.maxErrors
+              gameConfig.maxErrors
             }
           />
 
+          {/**
+           * Mensagem temporária
+           * após uma tentativa incorreta.
+           */}
           {message && (
             <div className="game-message">
               {message}
             </div>
           )}
 
-          <div
-            className={`game-board game-board-${cardCount}`}
-            style={
-              {
-                "--board-columns":
-                  boardColumns,
-              } as CSSProperties
-            }
-          >
+          {/**
+           * Tabuleiro fixo do Desafio GF.
+           *
+           * O jogo possui 16 cartas
+           * organizadas em uma grade 4 x 4.
+           */}
+          <div className="game-board">
             {cards.map(
               (card) => (
                 <Card
@@ -680,9 +664,9 @@ export function Game({
       )}
 
       {/**
-       * Instrucoes iniciais.
+       * Instruções iniciais.
        *
-       * A opcao de voltar aparece
+       * A opção de voltar aparece
        * somente no modo administrativo.
        */}
       {gameState.status ===
@@ -695,7 +679,8 @@ export function Game({
       )}
 
       {/**
-       * Contagem 3, 2, 1, JA!
+       * Contagem:
+       * 3, 2, 1, JÁ!
        */}
       {gameState.status ===
         "countdown" && (
@@ -707,78 +692,42 @@ export function Game({
       )}
 
       {/**
-       * DERROTA
+       * PARTICIPAÇÃO ENCERRADA
        *
-       * Qualquer derrota encerra
-       * definitivamente a participacao.
+       * O participante perdeu todas
+       * as vidas ou ficou sem tempo.
        */}
       {gameState.status ===
         "gameOver" && (
         <GameResultModal
-          participant={
-            participant
-          }
-          level={
-            gameState.level
-          }
+          participant={participant}
           completedGame={false}
-          onFinish={
-            onFinish
-          }
+          isAdmin={isAdmin}
+          onFinish={onFinish}
         />
       )}
 
       {/**
-       * NIVEL CONCLUIDO
+       * DESAFIO CONCLUÍDO
        *
-       * Nos niveis anteriores ao ultimo,
-       * permite avancar normalmente.
+       * Todos os pares foram encontrados.
        */}
       {gameState.status ===
-        "levelComplete" &&
-        !isLastLevel && (
-          <GameModal
-            type="levelComplete"
-            level={
-              gameState.level
-            }
-            isLastLevel={false}
-            onRestart={() => {}}
-            onNextLevel={
-              nextLevel
-            }
-          />
-        )}
-
-      {/**
-       * DESAFIO CONCLUIDO
-       *
-       * Ao concluir o ultimo nivel,
-       * mostra o resultado final.
-       */}
-      {gameState.status ===
-        "levelComplete" &&
-        isLastLevel && (
-          <GameResultModal
-            participant={
-              participant
-            }
-            level={
-              gameState.level
-            }
-            completedGame={true}
-            onFinish={
-              onFinish
-            }
-          />
-        )}
+        "challengeComplete" && (
+        <GameResultModal
+          participant={participant}
+          completedGame={true}
+          isAdmin={isAdmin}
+          onFinish={onFinish}
+        />
+      )}
     </main>
   );
 }
 
 /**
- * Cria e embaralha os pares
- * de cartas do nivel.
+ * Cria os pares de cartas
+ * e embaralha o tabuleiro.
  */
 function createCards(
   numberOfPairs: number
@@ -815,8 +764,7 @@ function createCards(
 }
 
 /**
- * Formata o tempo da partida
- * no formato MM:SS.
+ * Formata o tempo no padrão MM:SS.
  */
 function formatTime(
   totalSeconds: number
@@ -834,36 +782,4 @@ function formatTime(
   ).padStart(2, "0")}:${String(
     seconds
   ).padStart(2, "0")}`;
-}
-
-/**
- * Define a quantidade de colunas
- * de acordo com a quantidade
- * de cartas do nivel.
- */
-function getBoardColumns(
-  cardCount: number
-): number {
-  switch (cardCount) {
-    case 6:
-      return 3;
-
-    case 8:
-      return 4;
-
-    case 10:
-      return 5;
-
-    case 12:
-      return 4;
-
-    case 16:
-      return 4;
-
-    case 20:
-      return 5;
-
-    default:
-      return 4;
-  }
 }

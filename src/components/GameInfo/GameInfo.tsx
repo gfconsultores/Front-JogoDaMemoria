@@ -1,17 +1,22 @@
 /**
- * Componente responsavel por exibir as informacoes do nivel atual.
- * Mostra o nivel em que o jogador esta e uma mensagem de acordo
- * com o estado atual da partida.
+ * Componente responsável por exibir
+ * as informações do Desafio GF.
+ *
+ * Mostra o nome do desafio e uma mensagem
+ * de acordo com o estado atual da partida.
  */
 
 import type { GameState } from "../../types/game";
-import "./LevelInfo.css";
 
-interface LevelInfoProps {
+import "./GameInfo.css";
+
+interface GameInfoProps {
   gameState: GameState;
 }
 
-export function LevelInfo({ gameState }: LevelInfoProps) {
+export function GameInfo({
+  gameState,
+}: GameInfoProps) {
   function getStatusMessage() {
     switch (gameState.status) {
       case "memorizing":
@@ -20,7 +25,7 @@ export function LevelInfo({ gameState }: LevelInfoProps) {
       case "playing":
         return "Encontre os pares!";
 
-      case "levelComplete":
+      case "challengeComplete":
       case "gameOver":
         return "";
 
@@ -29,16 +34,17 @@ export function LevelInfo({ gameState }: LevelInfoProps) {
     }
   }
 
-  const statusMessage = getStatusMessage();
+  const statusMessage =
+    getStatusMessage();
 
   return (
-    <div className="level-info">
-      <span className="level-number">
-        Nível {gameState.level}
+    <div className="game-info">
+      <span className="game-info-title">
+        Desafio GF
       </span>
 
       {statusMessage && (
-        <span className="level-status">
+        <span className="game-info-status">
           {statusMessage}
         </span>
       )}
