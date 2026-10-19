@@ -1,0 +1,184 @@
+
+.device-activation {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    #08172c 0%,
+    #102e56 55%,
+    #174d94 100%
+  );
+  font-family: "Inter", Arial, sans-serif;
+}
+
+.device-activation-panel {
+  width: 100%;
+  max-width: 460px;
+  padding: 40px;
+  box-sizing: border-box;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #14243b;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.device-activation-panel h1 {
+  margin: 0 0 14px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: #102e56;
+}
+
+.device-activation-panel > p {
+  margin: 0 0 30px;
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+  color: #66758a;
+}
+
+.device-activation-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-activation-panel label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #233a57;
+}
+
+.device-activation-panel input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: 1px solid #ccd6e3;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #14243b;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.device-activation-panel input:focus {
+  border-color: #174d94;
+  box-shadow: 0 0 0 3px rgba(23, 77, 148, 0.14);
+}
+
+.device-activation-panel input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.device-activation-panel form button {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #174d94;
+  color: #ffffff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.device-activation-panel form button:hover:not(:disabled) {
+  background: #103b76;
+}
+
+.device-activation-panel button:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.device-activation-panel button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.device-activation-panel [role="alert"] {
+  margin: 4px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff1f1;
+  color: #a52222;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.device-activation-offline {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid #e3e9f1;
+  text-align: center;
+}
+
+.device-activation-offline p {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #66758a;
+}
+
+.device-activation-offline button {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px;
+  border: 1.5px solid #174d94;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #174d94;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.device-activation-offline button:hover:not(:disabled) {
+  background: #edf4fd;
+}
+
+@media (max-width: 600px) {
+  .device-activation {
+    padding: 18px;
+  }
+
+  .device-activation-panel {
+    padding: 28px 22px;
+    border-radius: 18px;
+  }
+
+  .device-activation-panel h1 {
+    font-size: 23px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .device-activation-panel {
+    max-width: 540px;
+    padding: 48px;
+  }
+
+  .device-activation-panel h1 {
+    font-size: 32px;
+  }
+
+  .device-activation-panel input,
+  .device-activation-panel button {
+    min-height: 58px;
+  }
+}

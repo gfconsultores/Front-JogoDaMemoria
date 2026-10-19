@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 import { Game } from "./pages/Game/Game";
@@ -11,8 +12,14 @@ import { Participants } from "./pages/Participants/Participants";
 import { Admin } from "./pages/Admin/Admin";
 
 import {
-  exportParticipantsToExcel,
+  downloadParticipantsExcel,
+  shareParticipantsExcel,
 } from "./export/participantsExport";
+
+import { syncPendingParticipants } from "./sync/participantSync";
+
+import { DeviceActivation } from "./components/DeviceActivation/DeviceActivation";
+import { isDeviceAuthenticated } from "./lib/deviceAuth";
 
 import "./App.css";
 
@@ -26,33 +33,18 @@ type AppScreen =
   | "participants";
 
 /**
- * ==================================================
  * CHAVES DA SESSÃO
- * ==================================================
- *
- * O sessionStorage mantém os dados quando
- * a página é atualizada com F5.
  */
-const SCREEN_KEY =
-  "gf-memory-current-screen";
-
-const PARTICIPANT_KEY =
-  "gf-memory-current-participant";
-
-const ADMIN_KEY =
-  "gf-memory-admin-session";
-
-const ADMIN_GAME_KEY =
-  "gf-memory-admin-game";
+const SCREEN_KEY = "gf-memory-current-screen";
+const PARTICIPANT_KEY = "gf-memory-current-participant";
+const ADMIN_KEY = "gf-memory-admin-session";
+const ADMIN_GAME_KEY = "gf-memory-admin-game";
 
 /**
- * ==================================================
  * RECUPERAR TELA ATUAL
- * ==================================================
  */
 function getInitialScreen(): AppScreen {
-  const savedScreen =
-    sessionStorage.getItem(SCREEN_KEY);
+  const savedScreen = sessionStorage.getItem(SCREEN_KEY);
 
   if (
     savedScreen === "registration" ||
@@ -67,303 +59,252 @@ function getInitialScreen(): AppScreen {
 }
 
 /**
- * ==================================================
  * RECUPERAR PARTICIPANTE ATUAL
- * ==================================================
  */
-function getInitialParticipant():
-  | ParticipantData
-  | null {
+function getInitialParticipant(): ParticipantData | null {
   const savedParticipant =
-    sessionStorage.getItem(
-      PARTICIPANT_KEY
-    );
+    sessionStorage.getItem(PARTICIPANT_KEY);
 
   if (!savedParticipant) {
     return null;
   }
 
   try {
-    return JSON.parse(
-      savedParticipant
-    ) as ParticipantData;
+    return JSON.parse(savedParticipant) as ParticipantData;
   } catch {
     return null;
   }
 }
 
 /**
- * ==================================================
  * RECUPERAR SESSÃO ADMINISTRATIVA
- * ==================================================
  */
 function getInitialAdminSession(): boolean {
-  return (
-    sessionStorage.getItem(
-      ADMIN_KEY
-    ) === "true"
-  );
+  return sessionStorage.getItem(ADMIN_KEY) === "true";
 }
 
 /**
- * ==================================================
  * RECUPERAR TIPO DA PARTIDA
- * ==================================================
- *
- * true:
- * partida iniciada pela Área Administrativa.
- *
- * false:
- * partida de um participante normal.
  */
 function getInitialAdminGame(): boolean {
-  return (
-    sessionStorage.getItem(
-      ADMIN_GAME_KEY
-    ) === "true"
-  );
+  return sessionStorage.getItem(ADMIN_GAME_KEY) === "true";
 }
 
 function App() {
   /**
-   * ==================================================
-   * ESTADO PRINCIPAL
-   * ==================================================
+   * ATIVAÇÃO DO QUIOSQUE GF
+   *
+   * Verifica a autenticação técnica do Supabase.
+   *
+   * - Sem internet: permite utilizar o jogo.
+   * - Com sessão salva: abre normalmente.
+   * - Com internet e sem sessão: solicita ativação.
    */
-
-  const [screen, setScreen] =
-    useState<AppScreen>(
-      getInitialScreen
+  const [activationStatus, setActivationStatus] =
+    useState<"checking" | "required" | "ready">(
+      "checking"
     );
 
+  useEffect(() => {
+    let active = true;
+
+    async function checkActivation() {
+      if (!navigator.onLine) {
+        if (active) {
+          setActivationStatus("ready");
+        }
+        return;
+      }
+
+      try {
+        const authenticated =
+          await isDeviceAuthenticated();
+
+        if (active) {
+          setActivationStatus(
+            authenticated ? "ready" : "required"
+          );
+        }
+      } catch (error) {
+        console.warn(
+          "[GF] Não foi possível verificar a ativação:",
+          error
+        );
+
+        if (active) {
+          setActivationStatus("ready");
+        }
+      }
+    }
+
+    void checkActivation();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   /**
-   * Participante atualmente jogando.
+   * SINCRONIZAÇÃO AUTOMÁTICA COM SUPABASE
    *
-   * Na partida administrativa usamos um participante
-   * interno apenas para atender à estrutura atual do
-   * componente Game.
+   * Tenta sincronizar:
+   * 1. Ao abrir o aplicativo.
+   * 2. Quando a conexão retorna.
    *
-   * Ele NÃO é salvo na lista de participantes.
+   * Não bloqueia o funcionamento do jogo.
    */
-  const [
-    participant,
-    setParticipant,
-  ] =
+  useEffect(() => {
+    function attemptSync() {
+      void syncPendingParticipants().catch((error) => {
+        console.warn(
+          "[GF Sync] Sincronização automática adiada:",
+          error
+        );
+      });
+    }
+
+    attemptSync();
+
+    window.addEventListener("online", attemptSync);
+
+    return () => {
+      window.removeEventListener("online", attemptSync);
+    };
+  }, []);
+
+  /**
+   * ESTADO PRINCIPAL
+   */
+  const [screen, setScreen] =
+    useState<AppScreen>(getInitialScreen);
+
+  /**
+   * PARTICIPANTE ATUAL
+   *
+   * Nas partidas administrativas, o participante
+   * interno não é salvo no cadastro.
+   */
+  const [participant, setParticipant] =
     useState<ParticipantData | null>(
       getInitialParticipant
     );
 
   /**
-   * ==================================================
    * SESSÃO ADMINISTRATIVA
-   * ==================================================
-   *
-   * Indica exclusivamente se houve autenticação
-   * administrativa.
-   *
-   * Não indica quem está jogando.
    */
   const [isAdmin, setIsAdmin] =
-    useState<boolean>(
-      getInitialAdminSession
-    );
+    useState<boolean>(getInitialAdminSession);
 
   /**
-   * ==================================================
    * PARTIDA ADMINISTRATIVA
-   * ==================================================
-   *
-   * Indica exclusivamente se o jogo atual foi
-   * iniciado pela Equipe GF.
    */
-  const [
-    isAdminGame,
-    setIsAdminGame,
-  ] =
-    useState<boolean>(
-      getInitialAdminGame
-    );
+  const [isAdminGame, setIsAdminGame] =
+    useState<boolean>(getInitialAdminGame);
 
   /**
-   * ==================================================
-   * PERSISTÊNCIA DA TELA
-   * ==================================================
+   * CONTROLE DA EXPORTAÇÃO
    */
+  const [isExporting, setIsExporting] =
+    useState<boolean>(false);
 
+  /**
+   * PERSISTÊNCIA DA TELA
+   */
   useEffect(() => {
-    sessionStorage.setItem(
-      SCREEN_KEY,
-      screen
-    );
+    sessionStorage.setItem(SCREEN_KEY, screen);
   }, [screen]);
 
   /**
-   * ==================================================
    * PERSISTÊNCIA DO PARTICIPANTE
-   * ==================================================
    */
-
   useEffect(() => {
     if (participant) {
       sessionStorage.setItem(
         PARTICIPANT_KEY,
         JSON.stringify(participant)
       );
-
       return;
     }
 
-    sessionStorage.removeItem(
-      PARTICIPANT_KEY
-    );
+    sessionStorage.removeItem(PARTICIPANT_KEY);
   }, [participant]);
 
   /**
-   * ==================================================
    * PERSISTÊNCIA DA SESSÃO ADMIN
-   * ==================================================
    */
-
   useEffect(() => {
     if (isAdmin) {
-      sessionStorage.setItem(
-        ADMIN_KEY,
-        "true"
-      );
-
+      sessionStorage.setItem(ADMIN_KEY, "true");
       return;
     }
 
-    sessionStorage.removeItem(
-      ADMIN_KEY
-    );
+    sessionStorage.removeItem(ADMIN_KEY);
   }, [isAdmin]);
 
   /**
-   * ==================================================
    * PERSISTÊNCIA DA PARTIDA ADMIN
-   * ==================================================
    */
-
   useEffect(() => {
     if (isAdminGame) {
-      sessionStorage.setItem(
-        ADMIN_GAME_KEY,
-        "true"
-      );
-
+      sessionStorage.setItem(ADMIN_GAME_KEY, "true");
       return;
     }
 
-    sessionStorage.removeItem(
-      ADMIN_GAME_KEY
-    );
+    sessionStorage.removeItem(ADMIN_GAME_KEY);
   }, [isAdminGame]);
 
   /**
-   * ==================================================
    * PROTEGER TELAS ADMINISTRATIVAS
-   * ==================================================
-   *
-   * Se por algum motivo a sessão administrativa
-   * não estiver ativa, não permitimos permanecer
-   * nas telas administrativas.
    */
   useEffect(() => {
     if (
       !isAdmin &&
-      (
-        screen === "admin" ||
-        screen === "participants"
-      )
+      (screen === "admin" || screen === "participants")
     ) {
       setScreen("registration");
     }
   }, [screen, isAdmin]);
 
   /**
-   * ==================================================
    * CORREÇÃO DE ESTADO INVÁLIDO DO JOGO
-   * ==================================================
-   *
-   * Se a tela salva for "game", mas não existir
-   * participante/jogador interno, retorna para uma
-   * tela válida.
    */
   useEffect(() => {
-    if (
-      screen === "game" &&
-      !participant
-    ) {
+    if (screen === "game" && !participant) {
       setIsAdminGame(false);
 
       if (isAdmin) {
         setScreen("admin");
       } else {
-        setScreen(
-          "registration"
-        );
+        setScreen("registration");
       }
     }
-  }, [
-    screen,
-    participant,
-    isAdmin,
-  ]);
+  }, [screen, participant, isAdmin]);
 
   /**
-   * ==================================================
-   * PARTICIPANTE NORMAL
-   * ==================================================
+   * CADASTRO DE PARTICIPANTE
    */
-
   function handleRegistrationSuccess(
     participantData: ParticipantData
   ) {
-    /**
-     * Uma partida iniciada pelo cadastro é sempre
-     * uma partida normal.
-     *
-     * Não encerramos a sessão administrativa aqui.
-     * Sessão administrativa e tipo de partida são
-     * estados independentes.
-     */
     setIsAdminGame(false);
-
-    setParticipant(
-      participantData
-    );
-
+    setParticipant(participantData);
     setScreen("game");
   }
 
   /**
-   * ==================================================
    * LOGIN ADMINISTRATIVO
-   * ==================================================
    */
-
   function handleAdminSuccess() {
     setIsAdmin(true);
-
     setIsAdminGame(false);
-
     setParticipant(null);
-
     setScreen("admin");
   }
 
   /**
-   * ==================================================
    * JOGAR COMO EQUIPE GF
-   * ==================================================
    *
-   * Estes dados são apenas internos para permitir
-   * que o componente Game continue recebendo um
-   * ParticipantData.
-   *
-   * Eles NÃO são credenciais administrativas
-   * e NÃO são gravados no cadastro.
+   * Não grava participante no banco.
    */
   function handlePlayAsGF() {
     const adminParticipant: ParticipantData = {
@@ -374,208 +315,225 @@ function App() {
     };
 
     setIsAdminGame(true);
-
-    setParticipant(
-      adminParticipant
-    );
-
+    setParticipant(adminParticipant);
     setScreen("game");
   }
 
   /**
-   * ==================================================
    * FINALIZAR JOGO
-   * ==================================================
    */
-
   function handleGameFinish() {
-    const finishedAdminGame =
-      isAdminGame;
+    const finishedAdminGame = isAdminGame;
 
     setParticipant(null);
-
     setIsAdminGame(false);
 
-    /**
-     * Se a partida foi iniciada pela Área
-     * Administrativa e a sessão continua ativa,
-     * retorna para o painel administrativo.
-     */
-    if (
-      finishedAdminGame &&
-      isAdmin
-    ) {
+    if (finishedAdminGame && isAdmin) {
       setScreen("admin");
-
       return;
     }
 
-    /**
-     * Participante normal retorna para
-     * a tela de cadastro.
-     */
     setScreen("registration");
   }
 
   /**
-   * ==================================================
-   * PARTICIPANTES
-   * ==================================================
+   * ABRIR PARTICIPANTES
    */
-
   function handleParticipants() {
     if (!isAdmin) {
-      setScreen(
-        "registration"
-      );
-
+      setScreen("registration");
       return;
     }
 
-    setScreen(
-      "participants"
-    );
+    setScreen("participants");
   }
 
   /**
-   * ==================================================
-   * EXPORTAÇÃO PARA EXCEL
-   * ==================================================
+   * BAIXAR PLANILHA EXCEL
    */
-
-  function handleExport() {
-    if (!isAdmin) {
+  async function handleDownloadExcel() {
+    if (!isAdmin || isExporting) {
       return;
     }
 
-    const exported =
-      exportParticipantsToExcel();
+    setIsExporting(true);
 
-    /**
-     * Caso ainda não exista
-     * nenhum participante.
-     */
-    if (!exported) {
+    try {
+      const result = await downloadParticipantsExcel();
+
+      if (!result.success) {
+        if (result.status === "NO_DATA") {
+          window.alert(
+            "Não existem participantes cadastrados para exportar."
+          );
+        } else if (result.status === "ERROR") {
+          window.alert(
+            `Não foi possível salvar a planilha: ${
+              result.error || "Tente novamente."
+            }`
+          );
+        }
+
+        return;
+      }
+
+      window.alert("Planilha salva com sucesso!");
+    } catch {
       window.alert(
-        "Não existem participantes cadastrados para exportar."
+        "Ocorreu um erro ao salvar a planilha."
       );
+    } finally {
+      setIsExporting(false);
     }
   }
 
   /**
-   * ==================================================
+   * COMPARTILHAR PLANILHA EXCEL
+   */
+  async function handleShareExcel() {
+    if (!isAdmin || isExporting) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const result = await shareParticipantsExcel();
+
+      if (!result.success) {
+        if (result.status === "NO_DATA") {
+          window.alert(
+            "Não existem participantes cadastrados para exportar."
+          );
+        } else if (result.status === "ERROR") {
+          window.alert(
+            `Não foi possível compartilhar a planilha: ${
+              result.error || "Tente novamente."
+            }`
+          );
+        }
+
+        return;
+      }
+
+      // O menu nativo de compartilhamento foi aberto.
+      // O usuário selecionará o aplicativo de destino.
+    } catch {
+      window.alert(
+        "Ocorreu um erro ao acionar o compartilhamento."
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  /**
    * SAIR DA ÁREA ADMINISTRATIVA
-   * ==================================================
-   *
-   * Este é o único fluxo que encerra explicitamente
-   * a sessão administrativa.
    */
   function handleAdminLogout() {
     setIsAdmin(false);
-
     setIsAdminGame(false);
-
     setParticipant(null);
-
-    setScreen(
-      "registration"
-    );
+    setScreen("registration");
   }
 
   /**
-   * ==================================================
    * VOLTAR DO JOGO ADMINISTRATIVO
-   * ==================================================
    */
-
   function handleAdminGameBack() {
     setParticipant(null);
-
     setIsAdminGame(false);
 
     if (isAdmin) {
       setScreen("admin");
-
       return;
     }
 
-    setScreen(
-      "registration"
+    setScreen("registration");
+  }
+
+  /**
+   * TELA DE PREPARAÇÃO DO QUIOSQUE
+   */
+  if (activationStatus === "checking") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          padding: "24px",
+          textAlign: "center",
+        }}
+      >
+        <p>Preparando o quiosque GF...</p>
+      </main>
     );
   }
 
   /**
-   * ==================================================
-   * TELA DE PARTICIPANTES
-   * ==================================================
+   * TELA DE ATIVAÇÃO TÉCNICA
    */
+  if (activationStatus === "required") {
+    return (
+      <DeviceActivation
+        onContinueOffline={() => {
+          setActivationStatus("ready");
+        }}
+        onSuccess={() => {
+          setActivationStatus("ready");
 
-  if (
-    screen ===
-    "participants" &&
-    isAdmin
-  ) {
+          void syncPendingParticipants().catch(
+            (error) => {
+              console.warn(
+                "[GF Sync] Sincronização após ativação adiada:",
+                error
+              );
+            }
+          );
+        }}
+      />
+    );
+  }
+
+  /**
+   * TELA DE PARTICIPANTES
+   */
+  if (screen === "participants" && isAdmin) {
     return (
       <Participants
-        onBack={() =>
-          setScreen("admin")
-        }
+        onBack={() => setScreen("admin")}
       />
     );
   }
 
   /**
-   * ==================================================
    * ÁREA ADMINISTRATIVA
-   * ==================================================
    */
-
-  if (
-    screen === "admin" &&
-    isAdmin
-  ) {
+  if (screen === "admin" && isAdmin) {
     return (
       <Admin
-        onParticipants={
-          handleParticipants
-        }
-        onPlayAsGF={
-          handlePlayAsGF
-        }
-        onExport={
-          handleExport
-        }
-        onLogout={
-          handleAdminLogout
-        }
+        onParticipants={handleParticipants}
+        onPlayAsGF={handlePlayAsGF}
+        onDownloadExcel={handleDownloadExcel}
+        onShareExcel={handleShareExcel}
+        isExporting={isExporting}
+        onLogout={handleAdminLogout}
       />
     );
   }
 
   /**
-   * ==================================================
-   * JOGO
-   * ==================================================
+   * TELA DO JOGO
    */
-
-  if (
-    screen === "game" &&
-    participant
-  ) {
+  if (screen === "game" && participant) {
     return (
       <Game
-        participant={
-          participant
-        }
-        onFinish={
-          handleGameFinish
-        }
-        isAdmin={
-          isAdminGame
-        }
+        participant={participant}
+        onFinish={handleGameFinish}
+        isAdmin={isAdminGame}
         onBack={
-          isAdminGame &&
-          isAdmin
+          isAdminGame && isAdmin
             ? handleAdminGameBack
             : undefined
         }
@@ -584,19 +542,12 @@ function App() {
   }
 
   /**
-   * ==================================================
-   * CADASTRO
-   * ==================================================
+   * TELA DE CADASTRO
    */
-
   return (
     <Registration
-      onSuccess={
-        handleRegistrationSuccess
-      }
-      onAdminSuccess={
-        handleAdminSuccess
-      }
+      onSuccess={handleRegistrationSuccess}
+      onAdminSuccess={handleAdminSuccess}
     />
   );
 }

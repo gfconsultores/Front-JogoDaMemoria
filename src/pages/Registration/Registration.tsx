@@ -7,7 +7,7 @@ import {
   participantPhoneExists,
   saveParticipant,
 } from "../../storage/participantsStorage";
-
+import { syncPendingParticipants } from "../../sync/participantSync";
 import "./Registration.css";
 
 /**
@@ -87,6 +87,12 @@ export function Registration({
    * Controla o modal de acesso administrativo.
    */
   const [showAdminLogin, setShowAdminLogin] =
+    useState(false);
+
+  /**
+   * Evita cliques múltiplos durante o salvamento assíncrono.
+   */
+  const [isSubmitting, setIsSubmitting] =
     useState(false);
 
   /**
@@ -175,10 +181,14 @@ export function Registration({
    * CADASTRAR PARTICIPANTE
    * ==================================================
    */
-  function handleSubmit(
+  async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     setError("");
     setFieldErrors({});
@@ -308,85 +318,89 @@ export function Registration({
       return;
     }
 
-    /**
-     * ==================================================
-     * TELEFONE JÁ CADASTRADO
-     * ==================================================
-     */
-    if (
-      participantPhoneExists(
-        cleanPhone
-      )
-    ) {
-      setFieldErrors({
-        phone:
-          "Este telefone já está cadastrado. Cada participante pode participar apenas uma vez.",
-      });
+    setIsSubmitting(true);
 
-      setInvalidFields({
-        name: false,
-        company: false,
-        role: false,
-        phone: true,
-      });
-
-      return;
-    }
-
-    /**
-     * ==================================================
-     * LIMITE DE PARTICIPANTES POR EMPRESA
-     * ==================================================
-     */
-    const companyParticipantCount =
-      getCompanyParticipantCount(
-        cleanCompany
-      );
-
-    if (
-      companyParticipantCount >= 3
-    ) {
-      setFieldErrors({
-        company:
-          "Esta empresa já atingiu o limite de 3 participantes.",
-      });
-
-      setInvalidFields({
-        name: false,
-        company: true,
-        role: false,
-        phone: false,
-      });
-
-      return;
-    }
-
-    /**
-     * ==================================================
-     * DADOS DO PARTICIPANTE
-     * ==================================================
-     */
-    const participant: ParticipantData = {
-      name: cleanName,
-      company: cleanCompany,
-      role: cleanRole,
-      phone: cleanPhone,
-    };
-
-    /**
-     * ==================================================
-     * SALVAR PARTICIPANTE
-     * ==================================================
-     */
     try {
-      saveParticipant(
-        participant
-      );
+      /**
+       * ==================================================
+       * TELEFONE JÁ CADASTRADO NO BANCO LOCAL
+       * ==================================================
+       */
+      const phoneAlreadyExists = await participantPhoneExists(cleanPhone);
+
+      if (phoneAlreadyExists) {
+        setFieldErrors({
+          phone:
+            "Este telefone já está cadastrado. Cada participante pode participar apenas uma vez.",
+        });
+
+        setInvalidFields({
+          name: false,
+          company: false,
+          role: false,
+          phone: true,
+        });
+
+        setIsSubmitting(false);
+        return;
+      }
+
+      /**
+       * ==================================================
+       * LIMITE DE PARTICIPANTES POR EMPRESA
+       * ==================================================
+       */
+      const companyParticipantCount = await getCompanyParticipantCount(cleanCompany);
+
+      if (companyParticipantCount >= 3) {
+        setFieldErrors({
+          company:
+            "Esta empresa já atingiu o limite de 3 participantes.",
+        });
+
+        setInvalidFields({
+          name: false,
+          company: true,
+          role: false,
+          phone: false,
+        });
+
+        setIsSubmitting(false);
+        return;
+      }
+
+      /**
+       * ==================================================
+       * DADOS DO PARTICIPANTE
+       * ==================================================
+       */
+      const participant: ParticipantData = {
+        name: cleanName,
+        company: cleanCompany,
+        role: cleanRole,
+        phone: cleanPhone,
+      };
+
+      /**
+       * ==================================================
+       * SALVAR PARTICIPANTE NO BANCO LOCAL
+       * ==================================================
+       */
+    await saveParticipant(participant);
+    setIsSubmitting(false);
+    onSuccess(participant);
+
+    // Sincronização em segundo plano.
+    // Não impede o participante de jogar caso esteja offline.
+    void syncPendingParticipants().catch((error) => {
+      console.warn("[GF Sync] Sincronização adiada:", error);
+    });
     } catch (saveError) {
+      setIsSubmitting(false);
+
       if (
         saveError instanceof Error &&
-        saveError.message ===
-          "PARTICIPANT_ALREADY_EXISTS"
+        saveError.message === "PARTICIPANT_ALREADY_EXISTS"
       ) {
         setFieldErrors({
           phone:
@@ -403,21 +417,29 @@ export function Registration({
         return;
       }
 
+      if (
+        saveError instanceof Error &&
+        saveError.message === "COMPANY_LIMIT_REACHED"
+      ) {
+        setFieldErrors({
+          company:
+            "Esta empresa já atingiu o limite de 3 participantes.",
+        });
+
+        setInvalidFields({
+          name: false,
+          company: true,
+          role: false,
+          phone: false,
+        });
+
+        return;
+      }
+
       setError(
         "Não foi possível realizar o cadastro. Tente novamente."
       );
-
-      return;
     }
-
-    console.log(
-      "Participante salvo:",
-      participant
-    );
-
-    onSuccess(
-      participant
-    );
   }
 
   /**
@@ -692,8 +714,9 @@ export function Registration({
             <button
               type="submit"
               className="registration-button"
+              disabled={isSubmitting}
             >
-              Cadastrar
+              {isSubmitting ? "Cadastrando..." : "Cadastrar"}
             </button>
           </form>
 

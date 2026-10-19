@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   getParticipants,
@@ -34,76 +34,48 @@ function normalizeCompany(
     .toLocaleLowerCase("pt-BR");
 }
 
-/**
- * ==================================================
- * OBTER EMPRESAS CADASTRADAS
- * ==================================================
- *
- * As empresas são obtidas automaticamente
- * através dos participantes já cadastrados.
- */
-function getRegisteredCompanies(): Company[] {
-  const participants =
-    getParticipants();
-
-  const companies =
-    new Map<string, Company>();
-
-  participants.forEach(
-    (participant) => {
-      const companyName =
-        participant.company.trim();
-
-      const normalizedName =
-        normalizeCompany(
-          companyName
-        );
-
-      if (
-        !normalizedName ||
-        companies.has(
-          normalizedName
-        )
-      ) {
-        return;
-      }
-
-      companies.set(
-        normalizedName,
-        {
-          id: normalizedName,
-          name: companyName,
-        }
-      );
-    }
-  );
-
-  return Array.from(
-    companies.values()
-  ).sort((a, b) =>
-    a.name.localeCompare(
-      b.name,
-      "pt-BR"
-    )
-  );
-}
-
 export function CompanyAutocomplete({
   value,
   onChange,
 }: CompanyAutocompleteProps) {
   const [isOpen, setIsOpen] =
     useState(false);
+  const [companies, setCompanies] =
+    useState<Company[]>([]);
 
-  /**
-   * Agora não existe mais nenhuma
-   * empresa fixa de teste.
-   *
-   * A lista é criada usando os
-   * participantes já cadastrados.
-   */
-  const companies =
-    getRegisteredCompanies();
+  useEffect(() => {
+    let isMounted = true;
+
+    getParticipants().then((participants) => {
+      if (!isMounted) return;
+
+      const map = new Map<string, Company>();
+
+      participants.forEach((participant) => {
+        const companyName = participant.company.trim();
+        const normalizedName = normalizeCompany(companyName);
+
+        if (!normalizedName || map.has(normalizedName)) {
+          return;
+        }
+
+        map.set(normalizedName, {
+          id: normalizedName,
+          name: companyName,
+        });
+      });
+
+      setCompanies(
+        Array.from(map.values()).sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR")
+        )
+      );
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const normalizedSearch =
     normalizeCompany(value);

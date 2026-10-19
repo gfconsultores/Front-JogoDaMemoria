@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   getParticipants,
@@ -14,9 +14,30 @@ interface ParticipantsProps {
 export function Participants({
   onBack,
 }: ParticipantsProps) {
-  const [participants] = useState<StoredParticipant[]>(
-    () => getParticipants()
-  );
+  const [participants, setParticipants] = useState<StoredParticipant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getParticipants()
+      .then((data) => {
+        if (isMounted) {
+          setParticipants(data);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar participantes:", err);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   /**
    * Formata o telefone apenas para exibição.
@@ -64,8 +85,12 @@ export function Participants({
           </p>
         </header>
 
-        {/* SEM PARTICIPANTES */}
-        {participants.length === 0 ? (
+        {/* SEM PARTICIPANTES OU CARREGANDO */}
+        {isLoading ? (
+          <div className="participants-empty">
+            Carregando participantes...
+          </div>
+        ) : participants.length === 0 ? (
           <div className="participants-empty">
             Nenhum participante cadastrado.
           </div>

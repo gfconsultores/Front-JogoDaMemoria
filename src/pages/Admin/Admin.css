@@ -148,6 +148,13 @@
   transform: translateY(0);
 }
 
+.admin-option:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
+}
+
 .admin-option:focus {
   outline: none;
 }

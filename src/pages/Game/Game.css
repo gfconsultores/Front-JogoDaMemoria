@@ -1,3 +1,19 @@
+
+/**
+ * ==================================================
+ * JOGO DA MEMÓRIA GF
+ * RESPONSIVIDADE DA TELA DAS CARTAS
+ * ==================================================
+ *
+ * Prioridade:
+ * Xiaomi Pad 7 em posição vertical.
+ *
+ * Tabuleiro:
+ * 16 cartas organizadas em 4 x 4.
+ *
+ * Não altera outras páginas do aplicativo.
+ */
+
 /**
  * ==================================================
  * TELA PRINCIPAL DO JOGO
@@ -5,50 +21,98 @@
  */
 
 .game {
-  --page-padding: clamp(10px, 2vw, 24px);
+  --page-padding: clamp(8px, 2vw, 20px);
+  --game-top-space: clamp(42px, 6dvh, 64px);
+  --game-bottom-space: clamp(8px, 2dvh, 18px);
 
   position: relative;
 
   width: 100%;
+
   min-height: 100vh;
   min-height: 100dvh;
 
   display: flex;
   flex-direction: column;
+
   align-items: center;
   justify-content: flex-start;
 
   padding:
-    clamp(45px, 7vh, 70px)
+    var(--game-top-space)
     var(--page-padding)
-    24px;
+    var(--game-bottom-space);
 
   box-sizing: border-box;
 }
 
-
 /**
  * ==================================================
- * TABULEIRO
+ * TABULEIRO — 16 CARTAS
  * ==================================================
- *
- * O Desafio GF possui 16 cartas,
- * organizadas em uma grade 4 x 4.
  */
 
 .game-board {
-  --gap: clamp(6px, 1.5vmin, 14px);
   --board-columns: 4;
   --board-rows: 4;
 
-  --card-size: min(
-    17vw,
-    17vh,
-    160px
+  --gap: clamp(5px, 1vmin, 12px);
+
+  /*
+   * Espaço reservado para:
+   * título, informações, vidas,
+   * margens e áreas do Android.
+   */
+  --reserved-height: clamp(
+    175px,
+    25dvh,
+    260px
   );
 
-  --card-w: var(--card-size);
-  --card-h: var(--card-size);
+  /*
+   * Altura disponível para as cartas.
+   */
+  --board-available-height: max(
+    0px,
+    calc(
+      100dvh -
+      var(--reserved-height) -
+      3 * var(--gap)
+    )
+  );
+
+  /*
+   * Tamanho máximo pela largura.
+   */
+  --card-by-width: calc(
+    (
+      100vw -
+      2 * var(--page-padding) -
+      3 * var(--gap)
+    ) / 4
+  );
+
+  /*
+   * Tamanho máximo pela altura.
+   */
+  --card-by-height: calc(
+    var(--board-available-height) / 4
+  );
+
+  /*
+   * Aumentado de 160px para 220px.
+   *
+   * A carta nunca ultrapassa
+   * os limites calculados.
+   */
+  --card-size: max(
+    0px,
+    min(
+      var(--card-by-width),
+      var(--card-by-height),
+      220px
+    )
+  );
 
   width: fit-content;
   max-width: 100%;
@@ -56,21 +120,34 @@
   display: grid;
 
   grid-template-columns:
-    repeat(
-      var(--board-columns),
-      var(--card-w)
-    );
+    repeat(4, var(--card-size));
 
-  grid-auto-rows: var(--card-h);
+  grid-template-rows:
+    repeat(4, var(--card-size));
 
   justify-content: center;
   align-content: center;
 
   gap: var(--gap);
 
-  margin-top: clamp(12px, 2vh, 20px);
+  margin-top: clamp(
+    8px,
+    1.5dvh,
+    14px
+  );
 }
 
+/**
+ * Elementos internos do tabuleiro.
+ */
+
+.game-board > * {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+}
 
 /**
  * ==================================================
@@ -96,15 +173,19 @@
 
   border-radius: 10px;
 
-  font-size: clamp(13px, 1.5vw, 16px);
-  font-weight: bold;
+  font-size: clamp(
+    13px,
+    1.5vw,
+    16px
+  );
 
+  font-weight: bold;
   white-space: nowrap;
 
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.15);
+    0 3px 10px
+    rgba(0, 0, 0, 0.15);
 }
-
 
 /**
  * ==================================================
@@ -128,17 +209,22 @@
 
   width: max-content;
 
-  max-width:
-    min(
-      420px,
-      calc(100vw - 30px)
-    );
+  max-width: min(
+    420px,
+    calc(100vw - 30px)
+  );
 
   padding: 13px 22px;
 
   box-sizing: border-box;
 
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(
+    255,
+    255,
+    255,
+    0.98
+  );
+
   color: #344054;
 
   border: 1px solid #e4e7ec;
@@ -151,14 +237,20 @@
   text-align: center;
 
   box-shadow:
-    0 8px 24px rgba(16, 24, 40, 0.1),
-    0 2px 6px rgba(16, 24, 40, 0.06);
+    0 8px 24px
+    rgba(16, 24, 40, 0.1),
+    0 2px 6px
+    rgba(16, 24, 40, 0.06);
 
   pointer-events: none;
 
-  animation: messageAppear 0.25s ease-out;
+  animation:
+    messageAppear 0.25s ease-out;
 }
 
+/**
+ * Animação das mensagens.
+ */
 
 @keyframes messageAppear {
   from {
@@ -178,76 +270,6 @@
   }
 }
 
-
-/**
- * ==================================================
- * TABLETS GRANDES / TELAS MAIS QUADRADAS
- * Exemplo: iPad Pro 13"
- * ==================================================
- */
-
-@media (min-width: 901px) and (max-aspect-ratio: 5/4) {
-
-  .game {
-    padding-top:
-      clamp(40px, 6vh, 60px);
-  }
-
-
-  .game-board {
-    --gap:
-      clamp(10px, 1.5vmin, 18px);
-
-    --reserved: 260px;
-
-    --max-card: 205px;
-
-    --avail-h: calc(
-      (
-        100dvh -
-        var(--reserved) -
-        (var(--board-rows) - 1) *
-        var(--gap)
-      ) /
-      var(--board-rows)
-    );
-
-
-    --card-w: min(
-      calc(
-        (
-          100vw -
-          2 * var(--page-padding) -
-          (var(--board-columns) - 1) *
-          var(--gap)
-        ) /
-        var(--board-columns)
-      ),
-      var(--avail-h),
-      var(--max-card)
-    );
-
-
-    --card-h: min(
-      var(--avail-h),
-      calc(var(--card-w) * 1.4)
-    );
-  }
-
-
-  .game-board > * {
-    width: 100%;
-    height: 100%;
-
-    min-width: 0;
-    min-height: 0;
-
-    font-size:
-      calc(var(--card-w) * 0.35);
-  }
-}
-
-
 /**
  * ==================================================
  * TABLETS E TELAS ATÉ 900PX
@@ -260,69 +282,23 @@
     --page-padding:
       clamp(8px, 2vw, 16px);
 
-    padding:
-      clamp(45px, 7vh, 65px)
-      var(--page-padding)
-      20px;
-  }
+    --game-top-space:
+      clamp(42px, 6dvh, 60px);
 
+    --game-bottom-space: 12px;
+  }
 
   .game-board {
     --gap:
-      clamp(5px, 1.2vmin, 10px);
+      clamp(4px, 1vmin, 9px);
 
-    --reserved: 180px;
-
-    --max-card: 160px;
-
-    --avail-h: calc(
-      (
-        100dvh -
-        var(--reserved) -
-        (var(--board-rows) - 1) *
-        var(--gap)
-      ) /
-      var(--board-rows)
-    );
-
-
-    --card-w: min(
-      calc(
-        (
-          100vw -
-          2 * var(--page-padding) -
-          (var(--board-columns) - 1) *
-          var(--gap)
-        ) /
-        var(--board-columns)
-      ),
-      calc(var(--avail-h) * 1.1),
-      var(--max-card)
-    );
-
-
-    --card-h: min(
-      var(--avail-h),
-      calc(var(--card-w) * 1.4)
-    );
-
-
-    margin-top:
-      clamp(10px, 1.5vh, 16px);
+    --reserved-height:
+      clamp(
+        155px,
+        24dvh,
+        220px
+      );
   }
-
-
-  .game-board > * {
-    width: 100%;
-    height: 100%;
-
-    min-width: 0;
-    min-height: 0;
-
-    font-size:
-      calc(var(--card-w) * 0.35);
-  }
-
 
   .memorize-timer,
   .play-timer {
@@ -335,7 +311,6 @@
   }
 }
 
-
 /**
  * ==================================================
  * CELULARES
@@ -346,65 +321,27 @@
 
   .game {
     --page-padding: 8px;
-
-    padding:
-      55px
-      var(--page-padding)
-      14px;
+    --game-top-space: 55px;
+    --game-bottom-space: 12px;
   }
-
 
   .game-board {
     --gap:
-      clamp(4px, 1.2vmin, 7px);
+      clamp(4px, 1vmin, 7px);
 
-    --max-card: 120px;
-    --reserved: 175px;
-
-    --avail-h: calc(
-      (
-        100dvh -
-        var(--reserved) -
-        (var(--board-rows) - 1) *
-        var(--gap)
-      ) /
-      var(--board-rows)
-    );
-
-    --card-w: min(
-      calc(
-        (
-          100vw -
-          2 * var(--page-padding) -
-          (var(--board-columns) - 1) *
-          var(--gap)
-        ) /
-        var(--board-columns)
-      ),
-      var(--avail-h),
-      var(--max-card)
-    );
-
-    --card-h: var(--card-w);
-
-    margin-top: 10px;
+    --reserved-height: 175px;
   }
-
 
   .memorize-timer,
   .play-timer {
-    position: fixed;
-
     top: 8px;
     right: 8px;
 
     margin: 0;
-
     padding: 6px 10px;
 
     font-size: 12px;
   }
-
 
   .game-message {
     top: 10px;
@@ -418,7 +355,6 @@
   }
 }
 
-
 /**
  * ==================================================
  * CELULARES MUITO PEQUENOS
@@ -429,34 +365,30 @@
 
   .game {
     --page-padding: 6px;
-
-    padding:
-      50px
-      var(--page-padding)
-      12px;
+    --game-top-space: 50px;
+    --game-bottom-space: 10px;
   }
-
 
   .game-board {
     --gap: 4px;
-    --max-card: 100px;
-
-    --card-w: min(
-      calc(
-        (
-          100vw -
-          2 * var(--page-padding) -
-          (var(--board-columns) - 1) *
-          var(--gap)
-        ) /
-        var(--board-columns)
-      ),
-      var(--avail-h),
-      var(--max-card)
-    );
-
-    --card-h: var(--card-w);
-
-    margin-top: 8px;
+    --reserved-height: 170px;
   }
+}
+
+/**
+ * XIAOMI PAD 7 — POSIÇÃO VERTICAL
+ * Ajuste específico para a simulação 854 × 1280
+ */
+
+@media screen
+  and (min-width: 850px)
+  and (max-width: 860px)
+  and (min-height: 1270px)
+  and (max-height: 1290px)
+  and (orientation: portrait) {
+
+  .game-board {
+  margin-top: 75px;
+}
+
 }

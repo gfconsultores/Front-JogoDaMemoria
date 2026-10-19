@@ -4,15 +4,19 @@ import "./Admin.css";
 interface AdminProps {
   onParticipants: () => void;
   onPlayAsGF: () => void;
-  onExport: () => void;
+  onDownloadExcel: () => void;
+  onShareExcel: () => void;
   onLogout: () => void;
+  isExporting?: boolean;
 }
 
 export function Admin({
   onParticipants,
   onPlayAsGF,
-  onExport,
+  onDownloadExcel,
+  onShareExcel,
   onLogout,
+  isExporting = false,
 }: AdminProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] =
     useState(false);
@@ -119,22 +123,48 @@ export function Admin({
             </span>
           </button>
 
-          {/* EXPORTAR */}
+          {/* BAIXAR PLANILHA */}
 
           <button
             type="button"
             className="admin-option"
-            onClick={onExport}
+            onClick={onDownloadExcel}
+            disabled={isExporting}
           >
             <div className="admin-option-icon">
               ↓
             </div>
 
             <div className="admin-option-content">
-              <strong>Exportar dados</strong>
+              <strong>Baixar planilha</strong>
 
               <span>
-                Exportar os participantes cadastrados.
+                Salvar o arquivo Excel no dispositivo.
+              </span>
+            </div>
+
+            <span className="admin-option-arrow">
+              ›
+            </span>
+          </button>
+
+          {/* COMPARTILHAR PLANILHA */}
+
+          <button
+            type="button"
+            className="admin-option"
+            onClick={onShareExcel}
+            disabled={isExporting}
+          >
+            <div className="admin-option-icon">
+              ↗
+            </div>
+
+            <div className="admin-option-content">
+              <strong>Compartilhar planilha</strong>
+
+              <span>
+                Enviar a planilha para outros aplicativos.
               </span>
             </div>
 

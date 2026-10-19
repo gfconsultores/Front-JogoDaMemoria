@@ -31,3 +31,6 @@ Thumbs.db
 # Arquivos temporarios
 *.tmp
 *.temp
+
+# Ferramentas locais isoladas (JDK portatil)
+/tools/
