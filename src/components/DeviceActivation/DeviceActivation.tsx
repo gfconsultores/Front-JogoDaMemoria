@@ -55,7 +55,7 @@ export function DeviceActivation({
   return (
     <main className="device-activation">
       <section className="device-activation-panel">
-        <h1>Ativação do Quiosque GF</h1>
+        <h1>Ativação do Dispositivo</h1>
 
         <p>
           Configure a sincronização automática
@@ -129,3 +129,6 @@ export function DeviceActivation({
     </main>
   );
 }
+
+
+// const { createClient } = await import("/node_modules/.vite/deps/@supabase_supabase-js.js");

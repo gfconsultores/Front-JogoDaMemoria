@@ -130,60 +130,79 @@ export class WebDatabaseAdapter implements IDatabaseService {
     });
   }
 
-  public async participantPhoneExists(
-    phone: string
-  ): Promise<boolean> {
-    await this.init();
-    if (!this.db) return false;
+  
+public async participantPhoneExists(
+  phone: string
+): Promise<boolean> {
+  await this.init();
+  if (!this.db) return false;
 
-    const normalized = normalizePhone(phone);
+  const normalized = normalizePhone(phone);
 
-    return new Promise((resolve, reject) => {
-      const tx = this.db!.transaction(
-        STORE_NAME,
-        "readonly"
+  return new Promise((resolve, reject) => {
+    const tx = this.db!.transaction(
+      STORE_NAME,
+      "readonly"
+    );
+
+    const store = tx.objectStore(STORE_NAME);
+    const index = store.index("phone");
+    const request = index.get(normalized);
+
+    request.onsuccess = () => {
+      const participant = request.result as
+        | StoredParticipant
+        | undefined;
+
+      resolve(
+        !!participant &&
+        participant.syncStatus !== "conflict"
       );
+    };
 
-      const store = tx.objectStore(STORE_NAME);
-      const index = store.index("phone");
-      const request = index.get(normalized);
+    request.onerror = () => reject(request.error);
+  });
+}
 
-      request.onsuccess = () => {
-        resolve(!!request.result);
-      };
+  
+public async getCompanyParticipantCount(
+  company: string
+): Promise<number> {
+  await this.init();
+  if (!this.db) return 0;
 
-      request.onerror = () => reject(request.error);
-    });
-  }
+  const normalized = normalizeCompany(company);
 
-  public async getCompanyParticipantCount(
-    company: string
-  ): Promise<number> {
-    await this.init();
-    if (!this.db) return 0;
+  return new Promise((resolve, reject) => {
+    const tx = this.db!.transaction(
+      STORE_NAME,
+      "readonly"
+    );
 
-    const normalized = normalizeCompany(company);
+    const store = tx.objectStore(STORE_NAME);
+    const index = store.index("normalizedCompany");
 
-    return new Promise((resolve, reject) => {
-      const tx = this.db!.transaction(
-        STORE_NAME,
-        "readonly"
-      );
+    const request = index.getAll(
+      IDBKeyRange.only(normalized)
+    );
 
-      const store = tx.objectStore(STORE_NAME);
-      const index = store.index("normalizedCompany");
+    request.onsuccess = () => {
+      const participants =
+        request.result as StoredParticipant[];
 
-      const request = index.count(
-        IDBKeyRange.only(normalized)
-      );
+      const validCount = participants.filter(
+        (participant) =>
+          participant.syncStatus === "synced" ||
+          participant.syncStatus === "pending"
+      ).length;
 
-      request.onsuccess = () => {
-        resolve(request.result || 0);
-      };
+      resolve(validCount);
+    };
 
-      request.onerror = () => reject(request.error);
-    });
-  }
+    request.onerror = () => reject(request.error);
+  });
+}
+
 
   public async saveParticipant(
     input: ParticipantInput
@@ -205,6 +224,7 @@ export class WebDatabaseAdapter implements IDatabaseService {
       .replace(/\s+/g, " ");
 
     const cleanPhone = normalizePhone(input.phone);
+
     const normalizedCompany = normalizeCompany(
       input.company
     );
@@ -311,6 +331,125 @@ export class WebDatabaseAdapter implements IDatabaseService {
   }
 
   /**
+   * ==================================================
+   * IMPORTAR PARTICIPANTES DO SUPABASE
+   * ==================================================
+   *
+   * Insere apenas participantes ainda não existentes
+   * no banco local.
+   *
+   * Regras:
+   * - Preserva os IDs originais do Supabase.
+   * - Não sobrescreve registros existentes.
+   * - Preserva registros pendentes e em conflito.
+   * - Ignora telefones já cadastrados.
+   * - Importa os novos registros como sincronizados.
+   *
+   * A reconciliação de exclusões será realizada
+   * posteriormente pela camada de sincronização.
+   */
+  public async importSyncedParticipants(
+    participants: StoredParticipant[]
+  ): Promise<void> {
+    await this.init();
+
+    if (!this.db) {
+      throw new Error("IndexedDB não disponível.");
+    }
+
+    const syncedAt = new Date().toISOString();
+
+    return new Promise((resolve, reject) => {
+      const tx = this.db!.transaction(
+        STORE_NAME,
+        "readwrite"
+      );
+
+      const store = tx.objectStore(STORE_NAME);
+      const phoneIndex = store.index("phone");
+
+      for (const participant of participants) {
+        const id = participant.id?.trim();
+        const cleanPhone = normalizePhone(
+          participant.phone || ""
+        );
+
+        if (!id || !cleanPhone) {
+          console.warn(
+            "[GF IndexedDB] Participante ignorado: ID ou telefone inválido."
+          );
+          continue;
+        }
+
+        const cleanName = participant.name.trim();
+
+        const cleanCompany = participant.company
+          .trim()
+          .replace(/\s+/g, " ");
+
+        const cleanRole = (participant.role || "")
+          .trim()
+          .replace(/\s+/g, " ");
+
+        const record = {
+          id,
+          name: cleanName,
+          company: cleanCompany,
+          normalizedCompany: normalizeCompany(
+            cleanCompany
+          ),
+          role: cleanRole,
+          phone: cleanPhone,
+          createdAt: participant.createdAt,
+          syncStatus: "synced" as SyncStatus,
+          conflictReason: undefined,
+          syncedAt: participant.syncedAt || syncedAt,
+        };
+
+        const idRequest = store.get(id);
+
+        idRequest.onsuccess = () => {
+          if (idRequest.result) {
+            return;
+          }
+
+          const phoneRequest = phoneIndex.get(
+            cleanPhone
+          );
+
+          phoneRequest.onsuccess = () => {
+            if (phoneRequest.result) {
+              return;
+            }
+
+            store.add(record);
+          };
+        };
+      }
+
+      tx.oncomplete = () => resolve();
+
+      tx.onerror = () => {
+        reject(
+          tx.error ||
+            new Error(
+              "Erro ao importar participantes no IndexedDB."
+            )
+        );
+      };
+
+      tx.onabort = () => {
+        reject(
+          tx.error ||
+            new Error(
+              "Importação de participantes cancelada."
+            )
+        );
+      };
+    });
+  }
+
+  /**
    * ==============================================================================
    * EXCLUSÃO INDIVIDUAL DE PARTICIPANTE
    * ==============================================================================
@@ -321,9 +460,6 @@ export class WebDatabaseAdapter implements IDatabaseService {
    *
    * A exclusão no Supabase e a autorização administrativa
    * serão realizadas por um serviço separado.
-   *
-   * Não utilizar diretamente na interface antes de
-   * concluir a integração com o Supabase.
    */
   public async deleteParticipant(
     id: string

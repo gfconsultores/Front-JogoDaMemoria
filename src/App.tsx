@@ -92,7 +92,7 @@ function getInitialAdminGame(): boolean {
 
 function App() {
   /**
-   * ATIVAÇÃO DO QUIOSQUE GF
+   * ATIVAÇÃO DO DISPOSITIVO
    *
    * Verifica a autenticação técnica do Supabase.
    *
@@ -453,7 +453,7 @@ function App() {
   }
 
   /**
-   * TELA DE PREPARAÇÃO DO QUIOSQUE
+   * TELA DE PREPARAÇÃO
    */
   if (activationStatus === "checking") {
     return (

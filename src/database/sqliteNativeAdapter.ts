@@ -207,57 +207,66 @@ export class SqliteNativeAdapter implements IDatabaseService {
    * VERIFICAR TELEFONE CADASTRADO
    * ==================================================
    */
-  public async participantPhoneExists(
-    phone: string
-  ): Promise<boolean> {
-    await this.init();
+  
+public async participantPhoneExists(
+  phone: string
+): Promise<boolean> {
+  await this.init();
 
-    if (!this.db) {
-      return false;
-    }
-
-    const normalized = normalizePhone(phone);
-
-    const res = await this.db.query(
-      "SELECT id FROM participants WHERE phone = ? LIMIT 1;",
-      [normalized]
-    );
-
-    return !!(
-      res.values &&
-      res.values.length > 0
-    );
+  if (!this.db) {
+    return false;
   }
+
+  const normalized = normalizePhone(phone);
+
+  const res = await this.db.query(
+    `SELECT id
+     FROM participants
+     WHERE phone = ?
+       AND sync_status IN ('synced', 'pending')
+     LIMIT 1;`,
+    [normalized]
+  );
+
+  return !!(
+    res.values &&
+    res.values.length > 0
+  );
+}
+
 
   /**
    * ==================================================
    * CONTAR PARTICIPANTES POR EMPRESA
    * ==================================================
    */
-  public async getCompanyParticipantCount(
-    company: string
-  ): Promise<number> {
-    await this.init();
+  
+public async getCompanyParticipantCount(
+  company: string
+): Promise<number> {
+  await this.init();
 
-    if (!this.db) {
-      return 0;
-    }
-
-    const normalized = normalizeCompany(company);
-
-    const res = await this.db.query(
-      `SELECT COUNT(*) as count
-       FROM participants
-       WHERE normalized_company = ?;`,
-      [normalized]
-    );
-
-    if (!res.values || res.values.length === 0) {
-      return 0;
-    }
-
-    return Number(res.values[0].count) || 0;
+  if (!this.db) {
+    return 0;
   }
+
+  const normalized = normalizeCompany(company);
+
+  const res = await this.db.query(
+    `SELECT COUNT(*) AS count
+     FROM participants
+     WHERE normalized_company = ?
+       AND sync_status IN ('synced', 'pending');`,
+    [normalized]
+  );
+
+  if (!res.values || res.values.length === 0) {
+    return 0;
+  }
+
+  return Number(res.values[0].count) || 0;
+}
+
 
   /**
    * ==================================================
@@ -454,6 +463,109 @@ export class SqliteNativeAdapter implements IDatabaseService {
           : undefined,
       })
     );
+  }
+
+  /**
+   * ==================================================
+   * IMPORTAR PARTICIPANTES DO SUPABASE
+   * ==================================================
+   *
+   * Insere somente participantes ainda não existentes
+   * no SQLite local.
+   *
+   * Regras:
+   * - Preserva o ID original do Supabase.
+   * - Não altera registros locais existentes.
+   * - Não substitui registros pendentes ou em conflito.
+   * - Ignora IDs já cadastrados.
+   * - Ignora telefones já cadastrados.
+   * - Registra os novos itens como sincronizados.
+   *
+   * Atenção:
+   * A remoção de registros excluídos do Supabase
+   * será tratada pela camada de sincronização.
+   */
+  public async importSyncedParticipants(
+    participants: StoredParticipant[]
+  ): Promise<void> {
+    await this.init();
+
+    if (!this.db) {
+      throw new Error(
+        "Banco de dados SQLite não disponível."
+      );
+    }
+
+    const insertQuery = `
+      INSERT OR IGNORE INTO participants (
+        id,
+        name,
+        company,
+        normalized_company,
+        role,
+        phone,
+        created_at,
+        sync_status,
+        conflict_reason,
+        synced_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `;
+
+    const syncedAt = new Date().toISOString();
+
+    for (const participant of participants) {
+      const id = participant.id?.trim();
+      const cleanPhone = normalizePhone(
+        participant.phone || ""
+      );
+
+      if (!id || !cleanPhone) {
+        console.warn(
+          "[GF SQLite] Participante ignorado: ID ou telefone inválido."
+        );
+        continue;
+      }
+
+      const cleanName = participant.name.trim();
+
+      const cleanCompany = participant.company
+        .trim()
+        .replace(/\s+/g, " ");
+
+      const cleanRole = (participant.role || "")
+        .trim()
+        .replace(/\s+/g, " ");
+
+      const normalizedCompany = normalizeCompany(
+        cleanCompany
+      );
+
+      try {
+        await this.db.run(
+          insertQuery,
+          [
+            id,
+            cleanName,
+            cleanCompany,
+            normalizedCompany,
+            cleanRole,
+            cleanPhone,
+            participant.createdAt,
+            "synced",
+            null,
+            participant.syncedAt || syncedAt,
+          ],
+          true
+        );
+      } catch (error) {
+        console.warn(
+          "[GF SQLite] Falha ao importar participante:",
+          id,
+          error
+        );
+      }
+    }
   }
 
   /**

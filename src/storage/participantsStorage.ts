@@ -1,11 +1,14 @@
+
 /**
  * ==============================================================================
  * Camada de Acesso a Dados de Participantes
- * Encaminha as operações para o banco local (SQLite nativo no Android ou IndexedDB na Web)
+ * Encaminha as operações para o banco local
+ * (SQLite nativo no Android ou IndexedDB na Web)
  * ==============================================================================
  */
 
 import { getDatabaseService } from "../database/databaseService";
+
 import type {
   ConflictReason,
   ParticipantInput,
@@ -31,21 +34,27 @@ export async function getParticipants(): Promise<StoredParticipant[]> {
 /**
  * Verifica se um telefone já está cadastrado no banco local.
  */
-export async function participantPhoneExists(phone: string): Promise<boolean> {
+export async function participantPhoneExists(
+  phone: string
+): Promise<boolean> {
   const db = getDatabaseService();
   return db.participantPhoneExists(phone);
 }
 
 /**
- * Retorna a quantidade de participantes cadastrados para a empresa especificada.
+ * Retorna a quantidade de participantes cadastrados
+ * para a empresa especificada.
  */
-export async function getCompanyParticipantCount(company: string): Promise<number> {
+export async function getCompanyParticipantCount(
+  company: string
+): Promise<number> {
   const db = getDatabaseService();
   return db.getCompanyParticipantCount(company);
 }
 
 /**
- * Salva um novo participante com validação de telefone único e limite de 3 por empresa.
+ * Salva um novo participante com validação de
+ * telefone único e limite de 3 por empresa.
  */
 export async function saveParticipant(
   participant: ParticipantInput
@@ -64,26 +73,66 @@ export async function updateParticipantSyncStatus(
   syncedAt?: string
 ): Promise<void> {
   const db = getDatabaseService();
-  return db.updateParticipantSyncStatus(id, syncStatus, conflictReason, syncedAt);
+
+  return db.updateParticipantSyncStatus(
+    id,
+    syncStatus,
+    conflictReason,
+    syncedAt
+  );
 }
 
 /**
- * Retorna os participantes pendentes de sincronização com o Supabase.
+ * Retorna os participantes pendentes de
+ * sincronização com o Supabase.
  */
-export async function getPendingParticipants(): Promise<StoredParticipant[]> {
+export async function getPendingParticipants(): Promise<
+  StoredParticipant[]
+> {
   const db = getDatabaseService();
   return db.getPendingParticipants();
 }
 
 /**
- * Limpa todos os participantes locais (utilizado para reset).
+ * Importa participantes recebidos do Supabase
+ * para o banco local.
+ *
+ * A implementação dos adaptadores:
+ * - Preserva os IDs originais.
+ * - Evita duplicidades por ID e telefone.
+ * - Não sobrescreve registros locais existentes.
+ * - Mantém os participantes pendentes.
+ * - Registra os novos participantes como sincronizados.
+ *
+ * Esta função não realiza consultas ao Supabase.
+ * Ela apenas encaminha os registros para o banco local.
+ */
+export async function importSyncedParticipants(
+  participants: StoredParticipant[]
+): Promise<void> {
+  const db = getDatabaseService();
+
+  return db.importSyncedParticipants(participants);
+}
+
+/**
+ * Limpa todos os participantes locais
+ * (utilizado para reset).
  */
 export async function clearAllParticipants(): Promise<void> {
   const db = getDatabaseService();
   return db.clearAllParticipants();
 }
 
-export async function deleteParticipant(id: string): Promise<void> {
+/**
+ * Exclui individualmente um participante do banco local.
+ *
+ * A autorização e a exclusão no Supabase são
+ * tratadas pela camada de serviço separada.
+ */
+export async function deleteParticipant(
+  id: string
+): Promise<void> {
   const db = getDatabaseService();
   return db.deleteParticipant(id);
 }

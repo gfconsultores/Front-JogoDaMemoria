@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 import { AdminLoginModal } from "../../components/AdminLoginModal/AdminLoginModal";
@@ -7,7 +8,9 @@ import {
   participantPhoneExists,
   saveParticipant,
 } from "../../storage/participantsStorage";
+
 import { syncPendingParticipants } from "../../sync/participantSync";
+
 import "./Registration.css";
 
 /**
@@ -323,10 +326,33 @@ export function Registration({
     try {
       /**
        * ==================================================
+       * ATUALIZAR CADASTROS ANTES DA VALIDAÇÃO LOCAL
+       * ==================================================
+       *
+       * Quando houver internet, aguarda a sincronização
+       * em andamento ou inicia uma nova tentativa.
+       *
+       * Se a conexão estiver indisponível ou o Supabase
+       * falhar, o cadastro offline continua permitido.
+       */
+      if (navigator.onLine) {
+        try {
+          await syncPendingParticipants();
+        } catch (syncError) {
+          console.warn(
+            "[GF Sync] Não foi possível atualizar antes do cadastro:",
+            syncError
+          );
+        }
+      }
+
+      /**
+       * ==================================================
        * TELEFONE JÁ CADASTRADO NO BANCO LOCAL
        * ==================================================
        */
-      const phoneAlreadyExists = await participantPhoneExists(cleanPhone);
+      const phoneAlreadyExists =
+        await participantPhoneExists(cleanPhone);
 
       if (phoneAlreadyExists) {
         setFieldErrors({
@@ -350,7 +376,8 @@ export function Registration({
        * LIMITE DE PARTICIPANTES POR EMPRESA
        * ==================================================
        */
-      const companyParticipantCount = await getCompanyParticipantCount(cleanCompany);
+      const companyParticipantCount =
+        await getCompanyParticipantCount(cleanCompany);
 
       if (companyParticipantCount >= 3) {
         setFieldErrors({
@@ -386,15 +413,24 @@ export function Registration({
        * SALVAR PARTICIPANTE NO BANCO LOCAL
        * ==================================================
        */
-    await saveParticipant(participant);
-    setIsSubmitting(false);
-    onSuccess(participant);
+      await saveParticipant(participant);
 
-    // Sincronização em segundo plano.
-    // Não impede o participante de jogar caso esteja offline.
-    void syncPendingParticipants().catch((error) => {
-      console.warn("[GF Sync] Sincronização adiada:", error);
-    });
+      setIsSubmitting(false);
+
+      onSuccess(participant);
+
+      /**
+       * Sincronização em segundo plano.
+       *
+       * Não impede o participante de jogar
+       * caso esteja offline.
+       */
+      void syncPendingParticipants().catch((error) => {
+        console.warn(
+          "[GF Sync] Sincronização adiada:",
+          error
+        );
+      });
     } catch (saveError) {
       setIsSubmitting(false);
 
@@ -716,7 +752,9 @@ export function Registration({
               className="registration-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Cadastrando..." : "Cadastrar"}
+              {isSubmitting
+                ? "Cadastrando..."
+                : "Cadastrar"}
             </button>
           </form>
 
