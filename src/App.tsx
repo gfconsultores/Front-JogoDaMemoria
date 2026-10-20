@@ -466,7 +466,7 @@ function App() {
           textAlign: "center",
         }}
       >
-        <p>Preparando o quiosque GF...</p>
+        <p>Carregando...</p>
       </main>
     );
   }

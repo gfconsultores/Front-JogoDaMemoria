@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Jogo da Memoria</string>
-    <string name="title_activity_main">Jogo da Memoria</string>
+    <string name="app_name">GF Link</string>
+    <string name="title_activity_main">GF Link</string>
     <string name="package_name">com.gf.jogomemoria</string>
     <string name="custom_url_scheme">com.gf.jogomemoria</string>
 </resources>

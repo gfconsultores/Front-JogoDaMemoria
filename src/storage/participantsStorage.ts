@@ -82,3 +82,8 @@ export async function clearAllParticipants(): Promise<void> {
   const db = getDatabaseService();
   return db.clearAllParticipants();
 }
+
+export async function deleteParticipant(id: string): Promise<void> {
+  const db = getDatabaseService();
+  return db.deleteParticipant(id);
+}
