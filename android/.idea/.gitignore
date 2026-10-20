@@ -1,3 +1,7 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+# Configuracoes locais do Android Studio
+/compiler.xml
+/deploymentTargetSelector.xml
+/runConfigurations.xml
